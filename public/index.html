@@ -245,7 +245,6 @@
             gap: 6px;
         }
         
-        /* Floating Dice Animation Effect */
         .dice-banner {
             font-size: 32px;
             text-align: center;
@@ -258,7 +257,6 @@
             50% { transform: translateY(-5px); }
         }
 
-        /* Permanent Floating Telegram Button CSS */
         .floating-telegram {
             position: fixed;
             bottom: 25px;
@@ -291,6 +289,39 @@
         .auth-tab-btn.active { background: var(--primary); color: white; }
         .auth-section { display: none; }
         .auth-section.active { display: block; }
+
+        /* Player Table Styling */
+        .player-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .player-table th, .player-table td {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            text-align: left;
+            font-size: 13px;
+        }
+        .player-table th {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        .player-table input {
+            margin: 0;
+            padding: 6px;
+            border: 1px solid transparent;
+            background: transparent;
+            font-size: 13px;
+            width: 100%;
+        }
+        .player-table input:focus {
+            background: #fff;
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -329,7 +360,7 @@
             <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Mobile Number (10 Digits):</label>
             <input type="text" id="reg-phone" placeholder="Mobile Number" maxlength="10">
 
-            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Password (8-12 chars, Case-Sensitive, Letters+Digits+Special):</label>
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Password:</label>
             <input type="password" id="reg-password" placeholder="Password (e.g. Ludo@123)">
 
             <button class="btn" onclick="registerUser()">Sign In / Register Karein</button>
@@ -492,36 +523,78 @@
                 <button onclick="logoutAdmin()" style="background: var(--danger); color: white; border: none; padding: 6px 14px; border-radius: 6px; float: right; cursor: pointer; font-weight: 600;">Logout</button>
                 <div style="clear: both;"></div>
 
-                <div style="background: #fffbeb; padding: 18px; border: 1px solid #fef3c7; border-radius: 12px; margin-top: 15px; margin-bottom: 24px;">
-                    <h4 style="margin-top: 0; color: #b45309;">🔑 User Password Direct Reset (Admin Override)</h4>
-                    <p style="font-size: 12px; color: #78350f;">Agar koi user password bhul jaye ya issue aaye, toh uska mobile number daal kar bina kisi condition ke naya password set karein:</p>
-                    <input type="text" id="adm-reset-mobile" placeholder="User ka 10-Digit Mobile Number" maxlength="10" style="background: white;">
-                    <input type="text" id="adm-reset-newpass" placeholder="Naya Password (New Password)" style="background: white;">
-                    <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; font-weight: 700; margin-top: 5px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);" onclick="adminResetUserPassword()">Password Direct Reset Karein</button>
+                <!-- Admin Internal Tabs for Features -->
+                <div style="display: flex; gap: 6px; margin: 15px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+                    <button class="btn" style="background: var(--primary); padding: 8px; font-size: 13px;" onclick="switchAdminSubTab('dashboard')">Dashboard & Requests</button>
+                    <button class="btn" style="background: #64748b; padding: 8px; font-size: 13px;" onclick="switchAdminSubTab('playerlist')">👥 Player List Manager</button>
                 </div>
 
-                <h4 style="color: #334155;">⏳ Pending Deposit Requests:</h4>
-                <div id="admin-deposits">Loading...</div>
+                <!-- SubTab 1: Dashboard -->
+                <div id="admin-subtab-dashboard">
+                    <div style="background: #fffbeb; padding: 18px; border: 1px solid #fef3c7; border-radius: 12px; margin-top: 15px; margin-bottom: 24px;">
+                        <h4 style="margin-top: 0; color: #b45309;">🔑 User Password Direct Reset (Admin Override)</h4>
+                        <p style="font-size: 12px; color: #78350f;">Agar koi user password bhul jaye ya issue aaye, toh uska mobile number daal kar bina kisi condition ke naya password set karein:</p>
+                        <input type="text" id="adm-reset-mobile" placeholder="User ka 10-Digit Mobile Number" maxlength="10" style="background: white;">
+                        <input type="text" id="adm-reset-newpass" placeholder="Naya Password (New Password)" style="background: white;">
+                        <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; font-weight: 700; margin-top: 5px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);" onclick="adminResetUserPassword()">Password Direct Reset Karein</button>
+                    </div>
 
-                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
-                <h4 style="color: #334155;">⏳ Pending Withdrawal Requests:</h4>
-                <div id="admin-withdrawals">Loading...</div>
+                    <h4 style="color: #334155;">⏳ Pending Deposit Requests:</h4>
+                    <div id="admin-deposits">Loading...</div>
 
-                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
-                <h4 style="color: #334155;">🏆 Pending Match Results (Win Proofs):</h4>
-                <div id="admin-results">Loading...</div>
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                    <h4 style="color: #334155;">⏳ Pending Withdrawal Requests:</h4>
+                    <div id="admin-withdrawals">Loading...</div>
 
-                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
-                <h4 style="color: #334155;">👥 User Wallet Manual Control:</h4>
-                <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px;">
-                    <input type="text" id="adm-username" placeholder="Target Mobile Number" style="background: white;">
-                    <input type="number" id="adm-amount" placeholder="Amount (₹)" style="background: white;">
-                    <select id="adm-type" style="background: white;">
-                        <option value="add">Add Balance</option>
-                        <option value="deduct">Deduct Balance</option>
-                    </select>
-                    <button class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onclick="adjustWallet()">Wallet Update Karein</button>
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                    <h4 style="color: #334155;">🏆 Pending Match Results (Win Proofs):</h4>
+                    <div id="admin-results">Loading...</div>
+
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                    <h4 style="color: #334155;">👥 User Wallet Manual Control:</h4>
+                    <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                        <input type="text" id="adm-username" placeholder="Target Mobile Number" style="background: white;">
+                        <input type="number" id="adm-amount" placeholder="Amount (₹)" style="background: white;">
+                        <select id="adm-type" style="background: white;">
+                            <option value="add">Add Balance</option>
+                            <option value="deduct">Deduct Balance</option>
+                        </select>
+                        <button class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onclick="adjustWallet()">Wallet Update Karein</button>
+                    </div>
                 </div>
+
+                <!-- SubTab 2: Player List Manager -->
+                <div id="admin-subtab-playerlist" style="display: none;">
+                    <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 15px;">
+                        <h4 style="margin-top: 0; color: #1e293b;">📋 All Registered / Managed Players Table</h4>
+                        <p style="font-size: 12px; color: #64748b;">Aap yahan naye players add kar sakte hain aur table mein direkt click karke kisi ka bhi Mobile Number, Name, ya Amount edit kar sakte hain:</p>
+                        
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                            <input type="text" id="new-p-mobile" placeholder="Mobile Number (10 Digits)" maxlength="10" style="margin:0; background:white;">
+                            <input type="text" id="new-p-name" placeholder="Player Name" style="margin:0; background:white;">
+                            <input type="number" id="new-p-amount" placeholder="Amount (₹)" style="margin:0; background:white;">
+                            <button class="btn" style="width: auto; padding: 8px 16px; background: #16a34a;" onclick="addNewPlayerRow()">+ Add Player</button>
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <table class="player-table">
+                               <thead>
+                                   <tr>
+                                       <th style="width: 30%;">Mobile Number</th>
+                                       <th style="width: 35%;">Name</th>
+                                       <th style="width: 25%;">Amount (₹)</th>
+                                       <th style="width: 10%;">Action</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="admin-players-tbody">
+                                   <!-- Dynamic Rows -->
+                               </tbody>
+                            </table>
+                        </div>
+                        <button class="btn" style="margin-top: 15px; background: #2563eb;" onclick="savePlayerListChanges()">💾 Sabhi Changes Save Karein</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -666,6 +739,17 @@
             if(tabName === 'txhistory') loadTxHistory();
         }
 
+        function switchAdminSubTab(subTab) {
+            if(subTab === 'dashboard') {
+                document.getElementById('admin-subtab-dashboard').style.display = 'block';
+                document.getElementById('admin-subtab-playerlist').style.display = 'none';
+            } else {
+                document.getElementById('admin-subtab-dashboard').style.display = 'none';
+                document.getElementById('admin-subtab-playerlist').style.display = 'block';
+                loadAdminPlayerTable();
+            }
+        }
+
         async function updatePassword(e) {
             e.preventDefault();
             const oldPassword = document.getElementById('old-password').value;
@@ -732,7 +816,7 @@
                                     </div>
                                 `;
                             } else {
-                                actionHtml = `<p style="color: #16a34a; font-weight: bold;">Joined by: ${c.joinedBy}</p><p style="color: #64748b; font-style: italic; font-size: 13px;">Creator ke room code bhejne ka intezaار hai...</p>`;
+                                actionHtml = `<p style="color: #16a34a; font-weight: bold;">Joined by: ${c.joinedBy}</p><p style="color: #64748b; font-style: italic; font-size: 13px;">Creator ke room code bhejne ka intezaar hai...</p>`;
                             }
                         } else if (c.status === 'Playing') {
                             actionHtml = `<p style="color: #9333ea; font-weight: bold; background: #f3e8ff; padding: 8px; border-radius: 6px;">🎮 Room Code: <code>${c.roomCode}</code> (Match Running)</p>`;
@@ -1048,6 +1132,96 @@
                 const resEl = document.getElementById('admin-results');
                 if(resEl) resEl.innerHTML = resHtml;
             } catch(e) { console.error(e); }
+        }
+
+        // --- Player List Manager Functions ---
+        async function loadAdminPlayerTable() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+                let tbodyHtml = '';
+                const players = data.players || [];
+
+                if(players.length === 0) {
+                    tbodyHtml = `<tr><td colspan="4" style="text-align:center; color:#64748b;">Koi player add nahi hai. Niche form se add karein.</td></tr>`;
+                } else {
+                    players.forEach((p, index) => {
+                        tbodyHtml += `
+                            <tr>
+                                <td><input type="text" id="p-mob-${index}" value="${p.mobile || ''}" maxlength="10"></td>
+                                <td><input type="text" id="p-name-${index}" value="${p.name || ''}"></td>
+                                <td><input type="number" id="p-amt-${index}" value="${p.amount || 0}"></td>
+                                <td style="text-align: center;"><button onclick="deletePlayerRow(${index})" style="background:#dc2626; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">❌</button></td>
+                            </tr>
+                        `;
+                    });
+                }
+                document.getElementById('admin-players-tbody').innerHTML = tbodyHtml;
+            } catch(e) { console.error(e); }
+        }
+
+        async function addNewPlayerRow() {
+            const mobile = document.getElementById('new-p-mobile').value.trim();
+            const name = document.getElementById('new-p-name').value.trim();
+            const amount = document.getElementById('new-p-amount').value.trim();
+
+            if(mobile.length !== 10 || !name) {
+                alert('Sahi 10-digit mobile number aur player ka naam daalein!');
+                return;
+            }
+
+            const res = await fetch('/api/admin/players/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mobile, name, amount: amount || 0 })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) {
+                document.getElementById('new-p-mobile').value = '';
+                document.getElementById('new-p-name').value = '';
+                document.getElementById('new-p-amount').value = '';
+                loadAdminPlayerTable();
+            }
+        }
+
+        async function savePlayerListChanges() {
+            const rows = document.querySelectorAll('#admin-players-tbody tr');
+            let updatedPlayers = [];
+            
+            rows.forEach((row, index) => {
+                const mobEl = document.getElementById(`p-mob-${index}`);
+                const nameEl = document.getElementById(`p-name-${index}`);
+                const amtEl = document.getElementById(`p-amt-${index}`);
+                if(mobEl && nameEl && amtEl) {
+                    updatedPlayers.push({
+                        mobile: mobEl.value.trim(),
+                        name: nameEl.value.trim(),
+                        amount: amtEl.value.trim()
+                    });
+                }
+            });
+
+            const res = await fetch('/api/admin/players/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ players: updatedPlayers })
+            });
+            const result = await res.json();
+            alert(result.message);
+            loadAdminPlayerTable();
+        }
+
+        async function deletePlayerRow(index) {
+            if(!confirm('Kya aap is player ko delete karna chahte hain?')) return;
+            const res = await fetch('/api/admin/players/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index })
+            });
+            const result = await res.json();
+            alert(result.message);
+            loadAdminPlayerTable();
         }
 
         async function verifyDeposit(depositId, action) {

@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Indian Ludo Hub - Tournament & Wallet Platform</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary: #ec4899;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg-gradient); 
+            min-height: 100vh;
+            margin: 0; 
+            padding: 10px; 
+            color: var(--text-main); 
+        }
+
+        header { 
+            background: linear-gradient(90deg, #4f46e5, #9333ea); 
+            color: white; 
+            padding: 20px; 
+            text-align: center; 
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Live Pulsing Badge Effect */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            color: #34d399;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            gap: 6px;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #34d399;
+            border-radius: 50%;
+            box-shadow: 0 0 0 rgba(52, 211, 153, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+
+        header h2 { margin: 0 0 5px 0; font-size: 24px; letter-spacing: 0.5px; }
+        header p { margin: 0; font-size: 14px; opacity: 0.9; }
+
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto 30px auto; 
+            background: var(--card-bg); 
+            padding: 24px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25); 
+        }
+
+        .nav-tabs { 
+            display: flex; 
+            justify-content: space-around; 
+            background: #f1f5f9; 
+            padding: 6px; 
+            border-radius: 10px; 
+            margin-bottom: 25px; 
+            flex-wrap: wrap; 
+            gap: 4px; 
+        }
+
+        .nav-tabs button { 
+            background: transparent; 
+            border: none; 
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            padding: 8px 12px; 
+            border-radius: 8px;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs button:hover { color: var(--primary); background: #e2e8f0; }
+        .nav-tabs button.active { 
+            background: var(--primary); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input, select, textarea { 
+            width: 100%; 
+            padding: 12px 14px; 
+            margin: 8px 0 16px 0; 
+            border: 1.5px solid #cbd5e1; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        button.btn { 
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            width: 100%; 
+            font-size: 16px; 
+            font-weight: 600;
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        button.btn:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4); 
+        }
+
+        .card { 
+            background: #fffbeb; 
+            padding: 18px; 
+            border: 1px solid #fef3c7; 
+            margin-bottom: 16px; 
+            border-radius: 12px; 
+            text-align: center; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .challenge-box { 
+            background: #f0fdf4; 
+            padding: 16px; 
+            margin-bottom: 16px; 
+            border-radius: 12px; 
+            border-left: 5px solid var(--success); 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: transform 0.2s;
+        }
+        .challenge-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.15);
+        }
+
+        .completed-box { 
+            background: #f8fafc; 
+            padding: 16px; 
+            margin-bottom: 16px; 
+            border-radius: 12px; 
+            border-left: 5px solid var(--text-muted); 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .admin-box { 
+            background: #fff5f5; 
+            padding: 12px 16px; 
+            margin-bottom: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #fed7d7; 
+        }
+
+        .wallet-banner { 
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); 
+            color: #0369a1;
+            padding: 18px; 
+            border-radius: 12px; 
+            font-size: 20px; 
+            font-weight: 700; 
+            margin-bottom: 20px; 
+            text-align: center; 
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+        }
+
+        .chat-box { 
+            background: #ffffff; 
+            border: 1px solid #e2e8f0; 
+            padding: 10px; 
+            max-height: 140px; 
+            overflow-y: auto; 
+            margin-top: 10px; 
+            font-size: 13px; 
+            border-radius: 8px; 
+        }
+
+        .warning-box { 
+            background: #fef2f2; 
+            color: #991b1b; 
+            padding: 14px; 
+            border: 1px solid #fecaca; 
+            border-radius: 10px; 
+            font-size: 12px; 
+            margin-top: 20px; 
+            text-align: center; 
+            line-height: 1.5;
+        }
+
+        .trusted-badge {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        /* Floating Dice Animation Effect */
+        .dice-banner {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 8px;
+            animation: bounceDice 2s infinite ease-in-out;
+        }
+        @keyframes bounceDice {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Permanent Floating Telegram Button CSS */
+        .floating-telegram {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #0088cc;
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
+            z-index: 9999;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .floating-telegram:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.6);
+        }
+        .floating-telegram svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+        
+        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+        .auth-tab-btn { flex: 1; background: #f1f5f9; border: none; padding: 12px; font-weight: 600; cursor: pointer; font-size: 14px; color: var(--text-muted); transition: 0.2s; }
+        .auth-tab-btn.active { background: var(--primary); color: white; }
+        .auth-section { display: none; }
+        .auth-section.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- Permanent Floating Telegram Widget -->
+    <a href="https://t.me/+Ph5IDyxzZWA1ZjNl" target="_blank" class="floating-telegram" title="Join Telegram Support">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.25.37-.51 1.02-.78 4-1.74 6.67-2.89 8.01-3.46 3.81-1.62 4.6-1.9 5.11-1.91.11 0 .37.03.54.17.14.12.18.28.2.4-.02.07-.02.13-.04.22z"/>
+        </svg>
+    </a>
+
+   <header>
+        <div class="live-indicator"><div class="pulse-dot"></div> LIVE TOURNAMENT ARENA</div>
+        <h2>🎲 New Indian Ludo Hub 🔴🟢🔵🟡</h2>
+        <p id="user-display">Logged in as: <span id="current-user-phone" style="font-weight: 600;">Guest</span></p>
+        <button onclick="logoutUser()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 4px 12px; font-size: 12px; border-radius: 6px; cursor: pointer; margin-top: 8px; font-weight: 600; transition: 0.2s;">Logout</button>
+    </header>
+
+    <div id="auth-container" class="container" style="max-width: 420px; margin-top: 30px;">
+        <div class="dice-banner">🎲 🔴 🟢 🔵 🟡 🎲</div>
+        <div class="trusted-badge">
+            🛡️ 100% Trusted & Secure Ludo Tournament Platform
+        </div>
+        <h2 style="text-align: center; color: #1e293b; margin-top: 5px; margin-bottom: 15px; font-size: 22px;">Welcome Gamer! 👋</h2>
+
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" onclick="switchAuthTab('signin')" id="btn-signin-tab">Sign In (Register)</button>
+            <button class="auth-tab-btn" onclick="switchAuthTab('login')" id="btn-login-tab">Login</button>
+        </div>
+
+        <div id="auth-signin" class="auth-section active">
+            <h3 style="text-align: center; margin-top: 0; color: #1e293b;">📝 Naya Account Banayein</h3>
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Aapka Naam (Name):</label>
+            <input type="text" id="reg-name" placeholder="Apna Naam Likhein">
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Mobile Number (10 Digits):</label>
+            <input type="text" id="reg-phone" placeholder="Mobile Number" maxlength="10">
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Password (8-12 chars, Case-Sensitive, Letters+Digits+Special):</label>
+            <input type="password" id="reg-password" placeholder="Password (e.g. Ludo@123)">
+
+            <button class="btn" onclick="registerUser()">Sign In / Register Karein</button>
+        </div>
+
+        <div id="auth-login" class="auth-section">
+            <h3 style="text-align: center; margin-top: 0; color: #1e293b;">🔐 Account Login</h3>
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Mobile Number (10 Digits):</label>
+            <input type="text" id="login-phone" placeholder="Mobile Number" maxlength="10">
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Password:</label>
+            <input type="password" id="login-password" placeholder="Aapka Password">
+
+            <button class="btn" style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);" onclick="loginUser()">Login Karein</button>
+        </div>
+
+        <div class="warning-box">
+            ⚠️ <b>CHETWANI (WARNING):</b> User hamesha ek strong password lagayein. Agar password weak hone ki wajah se ID hack hoti hai ya koi nuksan hota hai, toh iski saari zimmedari admin ki nahi hogi!
+        </div>
+    </div>
+
+    <div class="container" id="main-app-container" style="display: none;">
+        <div class="nav-tabs">
+            <button onclick="switchTab('games')" class="active" id="tab-games">Challenges</button>
+            <button onclick="switchTab('history')" id="tab-history">Completed</button>
+            <button onclick="switchTab('txhistory')" id="tab-txhistory">Transactions</button>
+            <button onclick="switchTab('wallet')" id="tab-wallet">Wallet</button>
+            <button onclick="switchTab('profile')" id="tab-profile">My Profile</button>
+            <button onclick="switchTab('admin')" id="tab-admin">Admin</button>
+        </div>
+
+        <div id="sec-games" class="section active">
+            <h3 style="color: #1e293b; margin-top: 0;">⚔️ Live Ludo Challenges</h3>
+            <div style="background: #f8fafc; padding: 18px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+                <h4 style="margin-top: 0; color: #334155;">Naya Game Challenge Banayein</h4>
+                <input type="text" id="creator-name" readonly style="background: #f1f5f9; color: #64748b;">
+                <input type="number" id="game-amount" placeholder="Amount (₹)">
+                <textarea id="game-desc" placeholder="Terms / Description (Jaise: Classic mode, 2 players)"></textarea>
+                <button class="btn" onclick="createChallenge()">Game Live Karein</button>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+            <h4 style="color: #334155;">Active Challenges List:</h4>
+            <div id="challenges-list">Loading...</div>
+
+            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+            <div style="background: #fffbeb; padding: 18px; border-radius: 12px; border: 1px solid #fef3c7;">
+                <h4 style="margin-top: 0; color: #b45309;">🏆 Match Jeetne par Screenshot Bhejein (Proof)</h4>
+                <form id="result-form" onsubmit="submitGameResult(event)">
+                    <input type="text" id="res-username" readonly style="background: #fef9c3; color: #78350f;">
+                    <input type="text" id="res-room" placeholder="Room Code jisme khele the" required>
+                    <label style="font-size: 12px; font-weight: 700; color: #92400e;">Jeetne ka Screenshot (Winning Screen):</label>
+                    <input type="file" id="res-screenshot" accept="image/*" required style="background: white;">
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">Winning Screenshot Submit Karein</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="sec-history" class="section">
+            <h3 style="color: #1e293b; margin-top: 0;">📜 Completed Games & Results</h3>
+            <div id="completed-challenges-list">Loading History...</div>
+        </div>
+
+        <div id="sec-txhistory" class="section">
+            <h3 style="color: #1e293b; margin-top: 0;">📊 Deposit & Withdrawal History</h3>
+            <h4 style="color: #334155;">💰 Deposit History:</h4>
+            <div id="user-deposit-history">Loading Deposits...</div>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+            <h4 style="color: #334155;">💸 Withdrawal History:</h4>
+            <div id="user-withdrawal-history">Loading Withdrawals...</div>
+        </div>
+
+        <div id="sec-wallet" class="section">
+            <div class="wallet-banner" id="wallet-balance-box">Aapka Balance: ₹0</div>
+            <h3 style="color: #1e293b; margin-top: 0;">💰 Add Money (Scan QR & Pay)</h3>
+            <div id="qr-codes-container">Loading QRs...</div>
+
+            <form id="deposit-form" onsubmit="submitDeposit(event)" style="margin-top: 15px;">
+                <input type="text" id="dep-username" readonly style="background: #f1f5f9; color: #64748b;">
+                <input type="number" id="dep-amount" placeholder="Amount Added (₹)" required>
+                <input type="text" id="dep-utr" placeholder="12 digit UTR / Transaction ID" required>
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Payment Screenshot:</label>
+                <input type="file" id="dep-screenshot" accept="image/*" required style="background: white;">
+                <button type="submit" class="btn">Deposit Request Bhejein</button>
+            </form>
+
+            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+            <h3 style="color: #1e293b;">💸 Withdraw Money</h3>
+            <form onsubmit="submitWithdrawal(event)">
+                <input type="text" id="wd-username" readonly style="background: #f1f5f9; color: #64748b;">
+                <input type="number" id="wd-amount" placeholder="Withdrawal Amount (₹)" required>
+                
+                <label style="font-size: 13px; font-weight: 700; color: #334155;">Withdrawal Method Chunein:</label>
+                <select id="wd-method" onchange="toggleWithdrawalFields()" style="margin-bottom: 10px;">
+                    <option value="upi">UPI ID</option>
+                    <option value="mobile">Mobile Number (PhonePe / Paytm / GPay / Other)</option>
+                    <option value="qr">QR Code Image</option>
+                </select>
+
+                <div id="wd-upi-box">
+                    <input type="text" id="wd-upi" placeholder="Aapki UPI ID (jaise: paytm@paytm)">
+                </div>
+
+                <div id="wd-mobile-box" style="display: none;">
+                    <input type="text" id="wd-mobile-number" placeholder="10-Digit Mobile Number" maxlength="10">
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; margin-top: 5px; display: block;">App Choose Karein:</label>
+                    <select id="wd-app-choice">
+                        <option value="PhonePe">🟣 PhonePe</option>
+                        <option value="Paytm">🔵 Paytm</option>
+                        <option value="GPay">🟢 Google Pay (GPay)</option>
+                        <option value="Other">⚪ Other Mobile Wallet</option>
+                    </select>
+                </div>
+
+                <div id="wd-qr-box" style="display: none;">
+                    <label style="font-size: 12px; font-weight: 700; color: #334155;">Apna Payment QR Code Upload Karein:</label>
+                    <input type="file" id="wd-qr-screenshot" accept="image/*" style="background: white;">
+                </div>
+
+                <button type="submit" class="btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); margin-top: 10px;">Withdrawal Request Bhejein</button>
+            </form>
+        </div>
+
+        <div id="sec-profile" class="section">
+            <h3 style="color: #1e293b; margin-top: 0;">👤 User Profile & Security</h3>
+            <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 20px;">
+                <p style="margin: 8px 0;"><b>Naam (Name):</b> <span id="profile-name-display" style="color: var(--primary); font-weight: 700;">-</span></p>
+                <p style="margin: 8px 0;"><b>Mobile Number:</b> <span id="profile-phone-display" style="color: var(--success); font-weight: 700;">-</span></p>
+                <p style="margin: 8px 0;"><b>Aapka Password:</b> 
+                    <span id="profile-password-display" style="font-weight: 700; color: #334155; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">********</span> 
+                    <button type="button" onclick="togglePasswordView()" id="view-pass-btn" style="background: #64748b; color: white; border: none; padding: 4px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; margin-left: 8px; font-weight: 600;">👁️ View</button>
+                </p>
+            </div>
+
+            <div style="background: #eff6ff; padding: 18px; border: 1px solid #bfdbfe; border-radius: 12px;">
+                <h4 style="margin-top: 0; color: #1e40af;">🔑 Password Update Karein</h4>
+                <form onsubmit="updatePassword(event)">
+                    <label style="font-size: 12px; font-weight: 700; color: #1e3a8a;">Purana Password:</label>
+                    <input type="password" id="old-password" placeholder="Purana Password Daalein" required style="background: white;">
+
+                    <label style="font-size: 12px; font-weight: 700; color: #1e3a8a;">Naya Password (8-12 chars, Case-Sensitive, Letters+Digits+Special):</label>
+                    <input type="password" id="new-password" placeholder="Naya Password Daalein" required style="background: white;">
+
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); margin-top: 10px;">Password Update Karein</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="sec-admin" class="section">
+            <div id="admin-login-box">
+                <h3 style="color: #1e293b; margin-top: 0;">🔐 Admin Panel Secure Login</h3>
+                <input type="password" id="admin-password-input" placeholder="Enter Secure Password">
+                <button class="btn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);" onclick="verifyAdminLogin()">Login Karein</button>
+            </div>
+
+            <div id="admin-dashboard-content" style="display: none;">
+                <h3 style="color: #1e293b; margin-top: 0; display: inline-block;">⚙️ Admin Control Panel</h3>
+                <button onclick="logoutAdmin()" style="background: var(--danger); color: white; border: none; padding: 6px 14px; border-radius: 6px; float: right; cursor: pointer; font-weight: 600;">Logout</button>
+                <div style="clear: both;"></div>
+
+                <div style="background: #fffbeb; padding: 18px; border: 1px solid #fef3c7; border-radius: 12px; margin-top: 15px; margin-bottom: 24px;">
+                    <h4 style="margin-top: 0; color: #b45309;">🔑 User Password Direct Reset (Admin Override)</h4>
+                    <p style="font-size: 12px; color: #78350f;">Agar koi user password bhul jaye ya issue aaye, toh uska mobile number daal kar bina kisi condition ke naya password set karein:</p>
+                    <input type="text" id="adm-reset-mobile" placeholder="User ka 10-Digit Mobile Number" maxlength="10" style="background: white;">
+                    <input type="text" id="adm-reset-newpass" placeholder="Naya Password (New Password)" style="background: white;">
+                    <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; font-weight: 700; margin-top: 5px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);" onclick="adminResetUserPassword()">Password Direct Reset Karein</button>
+                </div>
+
+                <h4 style="color: #334155;">⏳ Pending Deposit Requests:</h4>
+                <div id="admin-deposits">Loading...</div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                <h4 style="color: #334155;">⏳ Pending Withdrawal Requests:</h4>
+                <div id="admin-withdrawals">Loading...</div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                <h4 style="color: #334155;">🏆 Pending Match Results (Win Proofs):</h4>
+                <div id="admin-results">Loading...</div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                <h4 style="color: #334155;">👥 User Wallet Manual Control:</h4>
+                <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <input type="text" id="adm-username" placeholder="Target Mobile Number" style="background: white;">
+                    <input type="number" id="adm-amount" placeholder="Amount (₹)" style="background: white;">
+                    <select id="adm-type" style="background: white;">
+                        <option value="add">Add Balance</option>
+                        <option value="deduct">Deduct Balance</option>
+                    </select>
+                    <button class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onclick="adjustWallet()">Wallet Update Karein</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = localStorage.getItem('ludo_user') || '';
+        let currentUserName = localStorage.getItem('ludo_name') || '';
+        let currentUserPassword = localStorage.getItem('ludo_pass') || '';
+
+        window.onload = function() {
+            if (currentUser) {
+                showMainApp();
+            } else {
+                document.getElementById('auth-container').style.display = 'block';
+                document.getElementById('main-app-container').style.display = 'none';
+            }
+        };
+
+        function switchAuthTab(tabType) {
+            document.querySelectorAll('.auth-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
+            if(tabType === 'signin') {
+                document.getElementById('auth-signin').classList.add('active');
+                document.getElementById('btn-signin-tab').classList.add('active');
+            } else {
+                document.getElementById('auth-login').classList.add('active');
+                document.getElementById('btn-login-tab').classList.add('active');
+            }
+        }
+
+        async function registerUser() {
+            const name = document.getElementById('reg-name').value.trim();
+            const mobile = document.getElementById('reg-phone').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+
+            if (!name || mobile.length !== 10 || !password) {
+                alert('Kripya Naam, 10 digit mobile number aur password sahi se bharein!');
+                return;
+            }
+
+            const res = await fetch('/api/user/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mobile, password, name })
+            });
+            const data = await res.json();
+            alert(data.message);
+
+            if (data.success) {
+                currentUser = data.username;
+                currentUserName = data.name || name;
+                currentUserPassword = password;
+                localStorage.setItem('ludo_user', currentUser);
+                localStorage.setItem('ludo_name', currentUserName);
+                localStorage.setItem('ludo_pass', currentUserPassword);
+                showMainApp();
+            }
+        }
+
+        async function loginUser() {
+            const mobile = document.getElementById('login-phone').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            if (mobile.length !== 10 || !password) {
+                alert('Kripya 10 digit mobile number aur password daalein!');
+                return;
+            }
+
+            const res = await fetch('/api/user/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mobile, password })
+            });
+            const data = await res.json();
+            alert(data.message);
+
+            if (data.success) {
+                currentUser = data.username;
+                currentUserName = data.name || 'User';
+                currentUserPassword = password;
+                localStorage.setItem('ludo_user', currentUser);
+                localStorage.setItem('ludo_name', currentUserName);
+                localStorage.setItem('ludo_pass', currentUserPassword);
+                showMainApp();
+            }
+        }
+
+        function showMainApp() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('main-app-container').style.display = 'block';
+            document.getElementById('current-user-phone').innerText = currentUser + (currentUserName ? ` (${currentUserName})` : '');
+
+            if(document.getElementById('creator-name')) document.getElementById('creator-name').value = currentUser;
+            if(document.getElementById('dep-username')) document.getElementById('dep-username').value = currentUser;
+            if(document.getElementById('wd-username')) document.getElementById('wd-username').value = currentUser;
+            if(document.getElementById('res-username')) document.getElementById('res-username').value = currentUser;
+
+            if(document.getElementById('profile-name-display')) document.getElementById('profile-name-display').innerText = currentUserName;
+            if(document.getElementById('profile-phone-display')) document.getElementById('profile-phone-display').innerText = currentUser;
+
+            fetchBalance();
+            loadChallenges();
+            loadCompletedGames();
+            loadTxHistory();
+        }
+
+        function togglePasswordView() {
+            const passSpan = document.getElementById('profile-password-display');
+            const viewBtn = document.getElementById('view-pass-btn');
+            if (passSpan.innerText === '********') {
+                passSpan.innerText = currentUserPassword || 'N/A';
+                viewBtn.innerText = '🔒 Hide';
+            } else {
+                passSpan.innerText = '********';
+                viewBtn.innerText = '👁️ View';
+            }
+        }
+
+        function toggleWithdrawalFields() {
+            const method = document.getElementById('wd-method').value;
+            document.getElementById('wd-upi-box').style.display = (method === 'upi') ? 'block' : 'none';
+            document.getElementById('wd-mobile-box').style.display = (method === 'mobile') ? 'block' : 'none';
+            document.getElementById('wd-qr-box').style.display = (method === 'qr') ? 'block' : 'none';
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('ludo_user');
+            localStorage.removeItem('ludo_name');
+            localStorage.removeItem('ludo_pass');
+            location.reload();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+            const sec = document.getElementById('sec-' + tabName);
+            const tab = document.getElementById('tab-' + tabName);
+            if(sec) sec.classList.add('active');
+            if(tab) tab.classList.add('active');
+            if(tabName === 'games') loadChallenges();
+            if(tabName === 'history') loadCompletedGames();
+            if(tabName === 'txhistory') loadTxHistory();
+        }
+
+        async function updatePassword(e) {
+            e.preventDefault();
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+
+            const res = await fetch('/api/user/update-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mobile: currentUser, oldPassword, newPassword })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) {
+                currentUserPassword = newPassword;
+                localStorage.setItem('ludo_pass', currentUserPassword);
+                document.getElementById('profile-password-display').innerText = '********';
+                document.getElementById('view-pass-btn').innerText = '👁️ View';
+                document.getElementById('old-password').value = '';
+                document.getElementById('new-password').value = '';
+            }
+        }
+
+        async function fetchBalance() {
+            try {
+                const res = await fetch(`/api/user/${currentUser}`);
+                const data = await res.json();
+                const banner = document.getElementById('wallet-balance-box');
+                if(banner) banner.innerText = `Aapka Balance: ₹${data.balance}`;
+                if(data.name && !currentUserName) {
+                    currentUserName = data.name;
+                    localStorage.setItem('ludo_name', currentUserName);
+                    document.getElementById('profile-name-display').innerText = currentUserName;
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadChallenges() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+                let html = '';
+                
+                const activeChallenges = (data.challenges || []).filter(c => c.status !== 'completed');
+
+                if(activeChallenges.length === 0) {
+                    html = '<p style="color: #64748b;">Abhi koi active challenge nahi hai.</p>';
+                } else {
+                    activeChallenges.forEach(c => {
+                        let actionHtml = '';
+                        if (c.status === 'Open') {
+                            if (c.creator !== currentUser) {
+                                actionHtml = `<button class="btn" style="background:#0284c7; padding:6px 14px; width:auto; margin-top:8px;" onclick="joinChallenge(${c.id})">Ok (Join Game)</button>`;
+                            } else {
+                                actionHtml = `<p style="color: #d97706; font-size: 13px; font-weight: 600;">Aapka apna challenge hai (Player joining ka wait hai...)</p>`;
+                            }
+                        } else if (c.status === 'Running') {
+                            if (c.creator === currentUser) {
+                                actionHtml = `
+                                    <p style="color: #16a34a; font-weight: bold;">Joined by: ${c.joinedBy}</p>
+                                    <div style="margin-top:8px; background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fef3c7;">
+                                        <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px; color: #92400e;">Aap Creator hain, Room Code daalein:</label>
+                                        <input type="text" id="room-input-${c.id}" placeholder="Ludo Room Code Dalein" style="width:70%; display:inline-block; padding:8px; background: white;">
+                                        <button class="btn" style="background:#16a34a; width:25%; display:inline-block; padding:8px;" onclick="submitRoomCode(${c.id})">Send</button>
+                                    </div>
+                                `;
+                            } else {
+                                actionHtml = `<p style="color: #16a34a; font-weight: bold;">Joined by: ${c.joinedBy}</p><p style="color: #64748b; font-style: italic; font-size: 13px;">Creator ke room code bhejne ka intezaar hai...</p>`;
+                            }
+                        } else if (c.status === 'Playing') {
+                            actionHtml = `<p style="color: #9333ea; font-weight: bold; background: #f3e8ff; padding: 8px; border-radius: 6px;">🎮 Room Code: <code>${c.roomCode}</code> (Match Running)</p>`;
+                        }
+
+                        let chatMessages = '';
+                        if (c.chats && c.chats.length > 0) {
+                            c.chats.forEach(msg => {
+                                chatMessages += `<div style="margin-bottom: 4px;"><b>${msg.sender}:</b> ${msg.message} <span style="font-size:10px; color:#94a3b8;">(${msg.time})</span></div>`;
+                            });
+                        } else {
+                            chatMessages = '<div style="color: #94a3b8; font-size: 12px;">Abhi koi baatcheet nahi hui.</div>';
+                        }
+
+                        let chatHtml = `
+                            <div class="chat-box" id="chat-list-${c.id}">${chatMessages}</div>
+                            <div style="margin-top: 6px; display: flex; gap: 6px;">
+                                <input type="text" id="chat-input-${c.id}" placeholder="Message likhein..." style="flex: 1; padding: 6px 10px; font-size: 13px; margin:0; background: white;">
+                                <button onclick="sendChatMessage(${c.id})" style="padding: 6px 14px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Send</button>
+                            </div>
+                        `;
+
+                        html += `
+                            <div class="challenge-box">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <strong>Creator: ${c.creator}</strong> 
+                                    <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 6px; font-weight: 700;">₹${c.amount}</span>
+                                </div>
+                                <p style="margin: 4px 0; color: #475569; font-size: 14px;"><b>Terms:</b> ${c.description}</p>
+                                <p style="margin: 4px 0; font-size: 13px;"><b>Status:</b> <span style="color: #16a34a; text-transform: uppercase; font-weight: 700;">${c.status}</span></p>
+                                ${actionHtml}
+                                <div style="margin-top: 12px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+                                    <b style="font-size: 12px; color: #64748b;">Match Chat / Discussion:</b>
+                                    ${chatHtml}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                const listEl = document.getElementById('challenges-list');
+                if(listEl) listEl.innerHTML = html;
+
+                let qrHtml = '';
+                (data.qrCodes || []).forEach(q => {
+                    qrHtml += `
+                        <div class="card">
+                            <strong style="color: #b45309;">${q.name}</strong><br><br>
+                            <img src="${q.qrImage}" alt="QR Code" style="max-width: 160px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.1);"><br><br>
+                            UPI ID: <code style="background: #fff; padding: 4px 8px; font-weight: bold; border-radius: 4px; border: 1px solid #fef3c7;">${q.upiId}</code>
+                        </div>
+                    `;
+                });
+                const qrEl = document.getElementById('qr-codes-container');
+                if(qrEl) qrEl.innerHTML = qrHtml;
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadCompletedGames() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+                let historyHtml = '';
+
+                const completedChallenges = (data.challenges || []).filter(c => c.status === 'completed');
+
+                if(completedChallenges.length === 0) {
+                    historyHtml = '<p style="color: #64748b;">Abhi tak koi completed game nahi hai.</p>';
+                } else {
+                    completedChallenges.forEach(c => {
+                        let ssHtml = c.screenshot ? `<p><a href="${c.screenshot}" target="_blank"><img src="${c.screenshot}" alt="Win Proof" style="max-width: 120px; border-radius: 6px; border: 1px solid #cbd5e1;"></a></p>` : '<p style="color:#94a3b8; font-size: 13px;">Screenshot available nahi hai</p>';
+                        
+                        historyHtml += `
+                            <div class="completed-box">
+                                <p style="margin: 4px 0;"><b>Creator:</b> ${c.creator} vs <b>Joiner:</b> ${c.joinedBy || 'N/A'}</p>
+                                <p style="margin: 4px 0;"><b>Game Amount:</b> ₹${c.amount}</p>
+                                <p style="margin: 4px 0;"><b>Room Code:</b> <code>${c.roomCode || 'N/A'}</code></p>
+                                <p style="margin: 4px 0;"><b>Winner:</b> <span style="color: #16a34a; font-weight: bold;">${c.winner || 'N/A'}</span> (Won: ₹${c.winAmount || 0})</p>
+                                <p style="margin: 6px 0 2px 0; font-size: 13px; font-weight: 600; color: #475569;">Win Proof Screenshot:</p>
+                                ${ssHtml}
+                            </div>
+                        `;
+                    });
+                }
+                const historyEl = document.getElementById('completed-challenges-list');
+                if(historyEl) historyEl.innerHTML = historyHtml;
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadTxHistory() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+
+                let depHtml = '';
+                const myDeposits = (data.deposits || []).filter(d => d.username === currentUser);
+                if(myDeposits.length === 0) depHtml = '<p style="color:#64748b;">Aapne abhi koi deposit nahi kiya hai.</p>';
+                else {
+                    myDeposits.forEach(d => {
+                        let ss = d.screenshot ? `<a href="${d.screenshot}" target="_blank"><img src="${d.screenshot}" style="max-width:70px; border-radius:6px; border:1px solid #cbd5e1;"></a>` : 'N/A';
+                        depHtml += `<div class="admin-box" style="background:#fff;"><p style="margin:4px 0;"><b>Amount:</b> ₹${d.amount} | <b>UTR:</b> ${d.utr}</p><p style="margin:4px 0;"><b>Status:</b> <span style="color:${d.status==='Approved'?'#16a34a':(d.status==='Rejected'?'#dc2626':'#d97706')}; font-weight:bold;">${d.status}</span> | <span style="font-size:12px; color:#64748b;">${d.date}</span></p><p style="margin:4px 0;"><b>Proof:</b> ${ss}</p></div>`;
+                    });
+                }
+                const depEl = document.getElementById('user-deposit-history');
+                if(depEl) depEl.innerHTML = depHtml;
+
+                let wdHtml = '';
+                const myWithdrawals = (data.withdrawals || []).filter(w => w.username === currentUser);
+                if(myWithdrawals.length === 0) wdHtml = '<p style="color:#64748b;">Aapne abhi koi withdrawal nahi kiya hai.</p>';
+                else {
+                    myWithdrawals.forEach(w => {
+                        let detailsStr = w.upiId ? `UPI: ${w.upiId}` : (w.mobileNumber ? `Mobile: ${w.mobileNumber} (${w.appChoice})` : `QR Code Withdrawal`);
+                        let qrShow = w.qrScreenshot ? `<br><a href="${w.qrScreenshot}" target="_blank"><img src="${w.qrScreenshot}" style="max-width:50px; border-radius:4px; border:1px solid #cbd5e1;"></a>` : '';
+                        wdHtml += `<div class="admin-box" style="background:#fff;"><p style="margin:4px 0;"><b>Amount:</b> ₹${w.amount} | <b>Details:</b> ${detailsStr} ${qrShow}</p><p style="margin:4px 0;"><b>Status:</b> <span style="color:${w.status==='Approved'?'#16a34a':(w.status==='Rejected'?'#dc2626':'#d97706')}; font-weight:bold;">${w.status}</span> | <span style="font-size:12px; color:#64748b;">${w.date}</span></p></div>`;
+                    });
+                }
+                const wdEl = document.getElementById('user-withdrawal-history');
+                if(wdEl) wdEl.innerHTML = wdHtml;
+
+            } catch(e) { console.error(e); }
+        }
+
+        async function createChallenge() {
+            const amountInput = document.getElementById('game-amount');
+            const descInput = document.getElementById('game-desc');
+            const amount = amountInput ? amountInput.value : '';
+            const description = descInput ? descInput.value : '';
+            
+            if(!amount) { alert('Amount bharna zaroori hai!'); return; }
+            const res = await fetch('/api/challenge/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: currentUser, amount, description })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) { 
+                if(amountInput) amountInput.value = '';
+                if(descInput) descInput.value = '';
+                loadChallenges(); 
+                fetchBalance(); 
+            }
+        }
+
+        async function joinChallenge(challengeId) {
+            const res = await fetch('/api/challenge/join', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ challengeId, username: currentUser })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) { loadChallenges(); fetchBalance(); }
+        }
+
+        async function submitRoomCode(challengeId) {
+            const inputEl = document.getElementById(`room-input-${challengeId}`);
+            const roomCode = inputEl ? inputEl.value.trim() : '';
+            if(!roomCode) { alert('Room Code bharna zaroori hai!'); return; }
+            const res = await fetch('/api/challenge/roomcode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ challengeId, roomCode, username: currentUser })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) loadChallenges();
+        }
+
+        async function sendChatMessage(challengeId) {
+            const messageInput = document.getElementById(`chat-input-${challengeId}`);
+            const message = messageInput ? messageInput.value.trim() : '';
+            if (!message) return;
+
+            const res = await fetch('/api/challenge/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ challengeId, sender: currentUser, message })
+            });
+            const result = await res.json();
+            if (result.success) {
+                if(messageInput) messageInput.value = '';
+                loadChallenges();
+            }
+        }
+
+        async function submitDeposit(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('username', currentUser);
+            formData.append('amount', document.getElementById('dep-amount').value);
+            formData.append('utr', document.getElementById('dep-utr').value);
+            formData.append('screenshot', document.getElementById('dep-screenshot').files[0]);
+            const res = await fetch('/api/deposit', { method: 'POST', body: formData });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) {
+                document.getElementById('deposit-form').reset();
+                loadTxHistory();
+            }
+        }
+
+        async function submitWithdrawal(e) {
+            e.preventDefault();
+            const amount = document.getElementById('wd-amount').value;
+            const method = document.getElementById('wd-method').value;
+
+            const formData = new FormData();
+            formData.append('username', currentUser);
+            formData.append('amount', amount);
+            formData.append('method', method);
+
+            if (method === 'upi') {
+                const upiId = document.getElementById('wd-upi').value;
+                if(!upiId) { alert('Kripya UPI ID bharein!'); return; }
+                formData.append('upiId', upiId);
+            } else if (method === 'mobile') {
+                const mobileNumber = document.getElementById('wd-mobile-number').value;
+                const appChoice = document.getElementById('wd-app-choice').value;
+                if(mobileNumber.length !== 10) { alert('Kripya sahi 10-digit mobile number bharein!'); return; }
+                formData.append('mobileNumber', mobileNumber);
+                formData.append('appChoice', appChoice);
+            } else if (method === 'qr') {
+                const qrFile = document.getElementById('wd-qr-screenshot').files[0];
+                if(!qrFile) { alert('Kripya QR code screenshot upload karein!'); return; }
+                formData.append('qrScreenshot', qrFile);
+            }
+
+            const res = await fetch('/api/withdraw', { method: 'POST', body: formData });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) {
+                fetchBalance();
+                loadTxHistory();
+                e.target.reset();
+                toggleWithdrawalFields();
+            }
+        }
+
+        async function submitGameResult(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('username', currentUser);
+            formData.append('roomCode', document.getElementById('res-room').value);
+            formData.append('screenshot', document.getElementById('res-screenshot').files[0]);
+            const res = await fetch('/api/submit-result', { method: 'POST', body: formData });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) document.getElementById('result-form').reset();
+        }
+
+        async function verifyAdminLogin() {
+            const password = document.getElementById('admin-password-input').value;
+            const res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const result = await res.json();
+            if(result.success) {
+                document.getElementById('admin-login-box').style.display = 'none';
+                document.getElementById('admin-dashboard-content').style.display = 'block';
+                loadAdminData();
+            } else {
+                alert(result.message);
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('admin-login-box').style.display = 'block';
+            document.getElementById('admin-dashboard-content').style.display = 'none';
+        }
+
+        async function loadAdminData() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+
+                let depHtml = '';
+                const pendingDeposits = (data.deposits || []).filter(d => d.status === 'Pending');
+                if(pendingDeposits.length === 0) depHtml = '<p style="color:#64748b;">Koi pending deposit nahi hai.</p>';
+                else {
+                    pendingDeposits.forEach(d => {
+                        depHtml += `<div class="admin-box"><p style="margin:4px 0;"><b>Mobile: ${d.username}</b> | ₹${d.amount} | UTR: ${d.utr}</p><p style="margin:4px 0;"><a href="${d.screenshot}" target="_blank" style="color:var(--primary); font-weight:600;">View Screenshot</a></p><button class="btn" style="background:#16a34a; width:auto; padding:6px 12px; margin-top:6px;" onclick="verifyDeposit(${d.id}, 'Approve')">Approve</button> <button class="btn" style="background:#dc2626; width:auto; padding:6px 12px; margin-top:6px;" onclick="verifyDeposit(${d.id}, 'Reject')">Reject</button></div>`;
+                    });
+                }
+                const depEl = document.getElementById('admin-deposits');
+                if(depEl) depEl.innerHTML = depHtml;
+
+                let wdHtml = '';
+                const pendingWithdrawals = (data.withdrawals || []).filter(w => w.status === 'Pending');
+                if(pendingWithdrawals.length === 0) wdHtml = '<p style="color:#64748b;">Koi pending withdrawal nahi hai.</p>';
+                else {
+                    pendingWithdrawals.forEach(w => {
+                        let detailsStr = w.upiId ? `UPI: ${w.upiId}` : (w.mobileNumber ? `Mobile: ${w.mobileNumber} (${w.appChoice})` : `QR Code Image`);
+                        let qrLink = w.qrScreenshot ? `<br><a href="${w.qrScreenshot}" target="_blank" style="color:var(--primary); font-weight:600;">🔍 View QR Code</a>` : '';
+                        wdHtml += `<div class="admin-box"><p style="margin:4px 0;"><b>Mobile: ${w.username}</b> | ₹${w.amount} | <b>Type:</b> ${detailsStr} ${qrLink}</p><button class="btn" style="background:#16a34a; width:auto; padding:6px 12px; margin-top:6px;" onclick="verifyWithdrawal(${w.id}, 'Approve')">Approve</button> <button class="btn" style="background:#dc2626; width:auto; padding:6px 12px; margin-top:6px;" onclick="verifyWithdrawal(${w.id}, 'Reject')">Reject</button></div>`;
+                    });
+                }
+                const wdEl = document.getElementById('admin-withdrawals');
+                if(wdEl) wdEl.innerHTML = wdHtml;
+
+                let resHtml = '';
+                const pendingResults = (data.results || []).filter(r => r.status.includes('Pending'));
+                if(pendingResults.length === 0) resHtml = '<p style="color:#64748b;">Koi pending win result nahi hai.</p>';
+                else {
+                    pendingResults.forEach(r => {
+                        resHtml += `<div class="admin-box" style="background: #f0fdf4;"><p style="margin:4px 0;"><b>Winner: ${r.username}</b> | Room: ${r.roomCode}</p><p style="margin:4px 0;"><a href="${r.screenshot}" target="_blank" style="color:var(--primary); font-weight:600;">🔍 Win Proof Screenshot</a></p>
+                        <input type="number" id="win-amt-${r.id}" placeholder="Jeetne wali rashi (₹)" style="margin:8px 0; background:white;">
+                        <button class="btn" style="background:#16a34a; width:auto; padding:6px 12px;" onclick="verifyResult(${r.id}, 'Approve', '${r.username}')">Approve & Pay</button> 
+                        <button class="btn" style="background:#dc2626; width:auto; padding:6px 12px; margin-left:5px;" onclick="verifyResult(${r.id}, 'Reject', '${r.username}')">Reject</button></div>`;
+                    });
+                }
+                const resEl = document.getElementById('admin-results');
+                if(resEl) resEl.innerHTML = resHtml;
+            } catch(e) { console.error(e); }
+        }
+
+        async function verifyDeposit(depositId, action) {
+            const res = await fetch('/api/admin/verify-deposit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ depositId, action }) });
+            const result = await res.json(); alert(result.message); loadAdminData();
+        }
+
+        async function verifyWithdrawal(withdrawalId, action) {
+            const res = await fetch('/api/admin/verify-withdrawal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ withdrawalId, action }) });
+            const result = await res.json(); alert(result.message); loadAdminData();
+        }
+
+        async function verifyResult(resultId, action, username) {
+            const amtInput = document.getElementById(`win-amt-${resultId}`);
+            const winAmount = amtInput ? amtInput.value : 0;
+            const res = await fetch('/api/admin/verify-result', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ resultId, action, winAmount, username }) });
+            const result = await res.json(); alert(result.message); loadAdminData();
+        }
+
+        async function adjustWallet() {
+            const username = document.getElementById('adm-username').value;
+            const amount = document.getElementById('adm-amount').value;
+            const type = document.getElementById('adm-type').value;
+
+            if(!username || !amount) {
+                alert('Mobile number aur Amount dono bharna zaroori hai!');
+                return;
+            }
+
+            const res = await fetch('/api/admin/adjust-wallet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, amount, type })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if(result.success) {
+                document.getElementById('adm-username').value = '';
+                document.getElementById('adm-amount').value = '';
+                loadAdminData();
+            }
+        }
+
+        async function adminResetUserPassword() {
+            const mobile = document.getElementById('adm-reset-mobile').value.trim();
+            const newPassword = document.getElementById('adm-reset-newpass').value.trim();
+
+            if (mobile.length !== 10 || !newPassword) {
+                alert('Kripya sahi 10-digit mobile number aur naya password daalein!');
+                return;
+            }
+
+            const res = await fetch('/api/admin/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mobile, newPassword })
+            });
+            const result = await res.json();
+            alert(result.message);
+            if (result.success) {
+                document.getElementById('adm-reset-mobile').value = '';
+                document.getElementById('adm-reset-newpass').value = '';
+            }
+        }
+    </script>
+</body>
+</html>

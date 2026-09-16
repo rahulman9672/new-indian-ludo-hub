@@ -539,6 +539,10 @@
                         <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; font-weight: 700; margin-top: 5px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);" onclick="adminResetUserPassword()">Password Direct Reset Karein</button>
                     </div>
 
+                    <h4 style="color: #334155;">🎮 Live Games Control (Cancel / Issues):</h4>
+                    <div id="admin-live-games">Loading Live Games...</div>
+
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
                     <h4 style="color: #334155;">⏳ Pending Deposit Requests:</h4>
                     <div id="admin-deposits">Loading...</div>
 
@@ -743,6 +747,7 @@
             if(subTab === 'dashboard') {
                 document.getElementById('admin-subtab-dashboard').style.display = 'block';
                 document.getElementById('admin-subtab-playerlist').style.display = 'none';
+                loadAdminData();
             } else {
                 document.getElementById('admin-subtab-dashboard').style.display = 'none';
                 document.getElementById('admin-subtab-playerlist').style.display = 'block';
@@ -792,7 +797,7 @@
                 const data = await res.json();
                 let html = '';
                 
-                const activeChallenges = (data.challenges || []).filter(c => c.status !== 'completed');
+                const activeChallenges = (data.challenges || []).filter(c => c.status !== 'completed' && c.status !== 'Cancelled');
 
                 if(activeChallenges.length === 0) {
                     html = '<p style="color: #64748b;">Abhi koi active challenge nahi hai.</p>';
@@ -1094,6 +1099,25 @@
                 const res = await fetch('/api/admin/data');
                 const data = await res.json();
 
+                // Live Games Management for Admin (Cancel Option)
+                let liveGamesHtml = '';
+                const liveChallenges = (data.challenges || []).filter(c => c.status !== 'completed' && c.status !== 'Cancelled');
+                if(liveChallenges.length === 0) {
+                    liveGamesHtml = '<p style="color:#64748b;">Koi active/live game nahi chal raha hai.</p>';
+                } else {
+                    liveChallenges.forEach(c => {
+                        liveGamesHtml += `
+                            <div class="admin-box" style="background:#fff; border-left:4px solid #ef4444;">
+                                <p style="margin:4px 0;"><b>ID:</b> ${c.id} | <b>Creator:</b> ${c.creator} vs <b>Joiner:</b> ${c.joinedBy || 'Waiting...'}</p>
+                                <p style="margin:4px 0;"><b>Amount:</b> ₹${c.amount} | <b>Status:</b> <span style="color:#0284c7; font-weight:bold;">${c.status}</span></p>
+                                <button class="btn" style="background:#ef4444; width:auto; padding:6px 12px; margin-top:6px;" onclick="adminCancelGame(${c.id})">❌ Cancel Game & Refund</button>
+                            </div>
+                        `;
+                    });
+                }
+                const liveEl = document.getElementById('admin-live-games');
+                if(liveEl) liveEl.innerHTML = liveGamesHtml;
+
                 let depHtml = '';
                 const pendingDeposits = (data.deposits || []).filter(d => d.status === 'Pending');
                 if(pendingDeposits.length === 0) depHtml = '<p style="color:#64748b;">Koi pending deposit nahi hai.</p>';
@@ -1132,6 +1156,18 @@
                 const resEl = document.getElementById('admin-results');
                 if(resEl) resEl.innerHTML = resHtml;
             } catch(e) { console.error(e); }
+        }
+
+        async function adminCancelGame(challengeId) {
+            if(!confirm('Kya aap is live game ko cancel karna chahte hain?')) return;
+            const res = await fetch('/api/admin/cancel-game', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ challengeId })
+            });
+            const result = await res.json();
+            alert(result.message);
+            loadAdminData();
         }
 
         // --- Player List Manager Functions ---

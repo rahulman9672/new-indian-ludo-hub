@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from both 'public' folder and root directory as backup
+// Serve static files from 'public' folder and root directory as backup
 app.use(express.static('public'));
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -309,7 +309,7 @@ app.post('/api/admin/login', (req, res) => {
     }
 });
 
-// 12. Get All Admin Data
+// 12. Get All Admin Data (Including Users list for player management)
 app.get('/api/admin/data', (req, res) => {
     const db = readDB();
     res.json({
@@ -317,7 +317,8 @@ app.get('/api/admin/data', (req, res) => {
         deposits: db.deposits,
         withdrawals: db.withdrawals,
         results: db.results,
-        qrCodes: db.qrCodes
+        qrCodes: db.qrCodes,
+        users: db.users.map(u => ({ mobile: u.mobile, name: u.name, balance: u.balance })) // Send player list safely
     });
 });
 
@@ -379,7 +380,7 @@ app.post('/api/admin/verify-result', (req, res) => {
         resultItem.status = 'Approved';
         const amt = parseFloat(winAmount);
         
-        const challenge = db.challenges.challenges ? db.challenges.find(c => c.roomCode === resultItem.roomCode) : db.challenges.find(c => c.roomCode === resultItem.roomCode);
+        const challenge = db.challenges.find(c => c.roomCode === resultItem.roomCode);
         if (challenge) {
             challenge.status = 'completed';
             challenge.winner = username;
@@ -420,6 +421,23 @@ app.post('/api/admin/adjust-wallet', (req, res) => {
     res.json({ success: true, message: 'Wallet safalpurvak update kar diya gaya hai!' });
 });
 
+// NEW API: Admin direct edit user player info & balance (Editable Player List)
+app.post('/api/admin/update-user', (req, res) => {
+    const { mobile, name, balance } = req.body;
+    const db = readDB();
+    const user = db.users.find(u => u.mobile === mobile);
+
+    if (!user) {
+        return res.json({ success: false, message: 'User nahi mila!' });
+    }
+
+    if (name !== undefined) user.name = name;
+    if (balance !== undefined) user.balance = parseFloat(balance) || 0;
+
+    writeDB(db);
+    res.json({ success: true, message: 'Player details successfully update ho gayi!' });
+});
+
 // 17. Admin Direct Password Reset (Override)
 app.post('/api/admin/reset-password', (req, siteRes) => {
     const { mobile, newPassword } = req.body;
@@ -445,7 +463,7 @@ app.get('*', (req, res) => {
     } else if (fs.existsSync(rootPath)) {
         res.sendFile(rootPath);
     } else {
-        res.sendFile(publicPath); // default fallback
+        res.sendFile(publicPath);
     }
 });
 

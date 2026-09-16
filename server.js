@@ -34,13 +34,14 @@ function readDB() {
                 { id: 1, name: 'PhonePe / AU Small Finance Bank', upiId: 'jpsmall@ybl', qrImage: 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=jpsmall@ybl' },
                 { id: 2, name: 'Google Pay (GPay)', upiId: '9216290422@okbizaxis', qrImage: 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=9216290422@okbizaxis' }
             ],
-            adminPassword: 'admin123' // Secure admin password
+            adminPassword: 'Jaipur@!78499'
         };
         fs.writeFileSync(STORAGE_FILE, JSON.stringify(initialData, null, 2));
     }
     const data = fs.readFileSync(STORAGE_FILE);
     let db = JSON.parse(data);
     db.players = db.players || [];
+    db.adminPassword = db.adminPassword || 'Jaipur@!78499';
     return db;
 }
 
@@ -304,7 +305,7 @@ app.post('/api/submit-result', upload.single('screenshot'), (req, res) => {
 app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
     const db = readDB();
-    if (password === db.adminPassword || password === 'admin123') {
+    if (password === db.adminPassword || password === 'Jaipur@!78499') {
         res.json({ success: true });
     } else {
         res.json({ success: false, message: 'Galat admin password!' });
@@ -332,13 +333,11 @@ app.post('/api/admin/players/add', (req, res) => {
     const db = readDB();
     db.players = db.players || [];
     
-    // Check if player already exists in players or users
     let existing = db.players.find(p => p.mobile === mobile);
     if (!existing) {
         db.players.push({ mobile, name, amount: Number(amount) || 0 });
     }
     
-    // Also sync with users database so they can login
     let user = db.users.find(u => u.mobile === mobile);
     if (!user) {
         db.users.push({ mobile, password: 'Password@123', name, balance: Number(amount) || 0 });
@@ -356,7 +355,6 @@ app.post('/api/admin/players/update', (req, res) => {
     const db = readDB();
     db.players = players || [];
     
-    // Sync back with users
     db.players.forEach(p => {
         let user = db.users.find(u => u.mobile === p.mobile);
         if (user) {
@@ -393,12 +391,10 @@ app.post('/api/admin/cancel-game', (req, res) => {
     
     if (game) {
         game.status = 'Cancelled';
-        // Refund amount to creator
         if (game.creator) {
             let creatorUser = db.users.find(u => u.mobile === game.creator);
             if (creatorUser) creatorUser.balance += game.amount;
         }
-        // Refund amount to joiner if joined
         if (game.joinedBy) {
             let joinerUser = db.users.find(u => u.mobile === game.joinedBy);
             if (joinerUser) joinerUser.balance += game.amount;

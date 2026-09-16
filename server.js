@@ -8,8 +8,11 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from both 'public' folder and root directory as backup
 app.use(express.static('public'));
-app.use('/uploads', express.static('uploads'));
+app.use(express.static(__dirname));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Ensure uploads directory exists
 if (!fs.existsSync('./uploads')) {
@@ -69,14 +72,12 @@ app.post('/api/user/auth', (req, res) => {
     let user = db.users.find(u => u.mobile === mobile);
 
     if (user) {
-        // Login flow
         if (user.password === password) {
             res.json({ success: true, message: 'Login safal raha!', username: user.mobile, name: user.name });
         } else {
             res.json({ success: false, message: 'Galat password! Kripya dobara koshish karein.' });
         }
     } else {
-        // Register flow
         if (!name) {
             res.json({ success: false, message: 'Yeh mobile number registered nahi hai. Sign In karne ke liye Naam bharna zaroori hai!' });
             return;
@@ -378,7 +379,7 @@ app.post('/api/admin/verify-result', (req, res) => {
         resultItem.status = 'Approved';
         const amt = parseFloat(winAmount);
         
-        const challenge = db.challenges.find(c => c.roomCode === resultItem.roomCode);
+        const challenge = db.challenges.challenges ? db.challenges.find(c => c.roomCode === resultItem.roomCode) : db.challenges.find(c => c.roomCode === resultItem.roomCode);
         if (challenge) {
             challenge.status = 'completed';
             challenge.winner = username;
@@ -420,29 +421,31 @@ app.post('/api/admin/adjust-wallet', (req, res) => {
 });
 
 // 17. Admin Direct Password Reset (Override)
-app.post('/api/admin/reset-password', (req, res) => {
+app.post('/api/admin/reset-password', (req, siteRes) => {
     const { mobile, newPassword } = req.body;
     const db = readDB();
     const user = db.users.find(u => u.mobile === mobile);
 
     if (!user) {
-        return res.json({ success: false, message: 'Is mobile number se koi user registered nahi hai!' });
+        return siteRes.json({ success: false, message: 'Is mobile number se koi user registered nahi hai!' });
     }
 
     user.password = newPassword;
     writeDB(db);
-    res.json({ success: true, message: `User (${mobile}) ka password bina kisi condition ke successfully change kar diya gaya hai!` });
+    siteRes.json({ success: true, message: `User (${mobile}) ka password bina kisi condition ke successfully change kar diya gaya hai!` });
 });
 
-// Fallback Route to serve index file inside public folder properly
+// Fallback Route: Try serving index.html from public or root
 app.get('*', (req, res) => {
-    const indexPath = path.join(__dirname, 'public', 'index');
-    if (fs.existsSync(indexPath + '.html')) {
-        res.sendFile(indexPath + '.html');
-    } else if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
+    const publicPath = path.join(__dirname, 'public', 'index.html');
+    const rootPath = path.join(__dirname, 'index.html');
+
+    if (fs.existsSync(publicPath)) {
+        res.sendFile(publicPath);
+    } else if (fs.existsSync(rootPath)) {
+        res.sendFile(rootPath);
     } else {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        res.sendFile(publicPath); // default fallback
     }
 });
 

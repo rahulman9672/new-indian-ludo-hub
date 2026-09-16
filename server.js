@@ -434,9 +434,16 @@ app.post('/api/admin/reset-password', (req, res) => {
     res.json({ success: true, message: `User (${mobile}) ka password bina kisi condition ke successfully change kar diya gaya hai!` });
 });
 
-// Fallback Route to serve index.html (Prevents Cannot GET / error)
+// Fallback Route to serve index file inside public folder properly
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    const indexPath = path.join(__dirname, 'public', 'index');
+    if (fs.existsSync(indexPath + '.html')) {
+        res.sendFile(indexPath + '.html');
+    } else if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    }
 });
 
 app.listen(PORT, () => {

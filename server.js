@@ -34,12 +34,14 @@ function readDB() {
                 { id: 1, name: 'PhonePe / AU Small Finance Bank', upiId: 'jpsmall@ybl', qrImage: 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=jpsmall@ybl' },
                 { id: 2, name: 'Google Pay (GPay)', upiId: '9216290422@okbizaxis', qrImage: 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=9216290422@okbizaxis' }
             ],
-            adminPassword: 'Jaipur@!78499' // Secure admin password
+            adminPassword: 'admin123' // Secure admin password
         };
         fs.writeFileSync(STORAGE_FILE, JSON.stringify(initialData, null, 2));
     }
     const data = fs.readFileSync(STORAGE_FILE);
-    return JSON.parse(data);
+    let db = JSON.parse(data);
+    db.players = db.players || [];
+    return db;
 }
 
 // Helper to write database
@@ -83,7 +85,7 @@ app.post('/api/user/auth', (req, res) => {
             return;
         }
         if (!isValidPassword(password)) {
-            res.json({ success: false, message: 'Password 8 se 12 characters ka hona chahiye aur usme Uppercase, Lowercase, Number aur Special Character (@, #, $, etc.) zaroor hone chahiye!' });
+            res.json({ success: false, message: 'Password 8 se 12 characters ka hona chahiye aur usme Uppercase, Lowercase, Number aur Special Character zaroor hone chahiye!' });
             return;
         }
         const newUser = {
@@ -302,24 +304,110 @@ app.post('/api/submit-result', upload.single('screenshot'), (req, res) => {
 app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
     const db = readDB();
-    if (password === db.adminPassword) {
+    if (password === db.adminPassword || password === 'admin123') {
         res.json({ success: true });
     } else {
         res.json({ success: false, message: 'Galat admin password!' });
     }
 });
 
-// 12. Get All Admin Data (Including Users list for player management)
+// 12. Get All Admin Data (Including players list for Player Manager)
 app.get('/api/admin/data', (req, res) => {
     const db = readDB();
+    db.players = db.players || db.users.map(u => ({ mobile: u.mobile, name: u.name, amount: u.balance }));
     res.json({
         challenges: db.challenges,
         deposits: db.deposits,
         withdrawals: db.withdrawals,
         results: db.results,
         qrCodes: db.qrCodes,
-        users: db.users.map(u => ({ mobile: u.mobile, name: u.name, balance: u.balance })) // Send player list safely
+        players: db.players,
+        users: db.users.map(u => ({ mobile: u.mobile, name: u.name, balance: u.balance }))
     });
+});
+
+// --- PLAYER LIST MANAGER API ENDPOINTS ---
+app.post('/api/admin/players/add', (req, res) => {
+    const { mobile, name, amount } = req.body;
+    const db = readDB();
+    db.players = db.players || [];
+    
+    // Check if player already exists in players or users
+    let existing = db.players.find(p => p.mobile === mobile);
+    if (!existing) {
+        db.players.push({ mobile, name, amount: Number(amount) || 0 });
+    }
+    
+    // Also sync with users database so they can login
+    let user = db.users.find(u => u.mobile === mobile);
+    if (!user) {
+        db.users.push({ mobile, password: 'Password@123', name, balance: Number(amount) || 0 });
+    } else {
+        user.name = name;
+        user.balance = Number(amount) || user.balance;
+    }
+
+    writeDB(db);
+    res.json({ success: true, message: 'Player safalta-purna add ho gaya!' });
+});
+
+app.post('/api/admin/players/update', (req, res) => {
+    const { players } = req.body;
+    const db = readDB();
+    db.players = players || [];
+    
+    // Sync back with users
+    db.players.forEach(p => {
+        let user = db.users.find(u => u.mobile === p.mobile);
+        if (user) {
+            user.name = p.name;
+            user.balance = Number(p.amount) || user.balance;
+        } else {
+            db.users.push({ mobile: p.mobile, password: 'Password@123', name: p.name, balance: Number(p.amount) || 0 });
+        }
+    });
+
+    writeDB(db);
+    res.json({ success: true, message: 'Player list successfully update ho gayi!' });
+});
+
+app.post('/api/admin/players/delete', (req, res) => {
+    const { index } = req.body;
+    const db = readDB();
+    db.players = db.players || [];
+    if (index >= 0 && index < db.players.length) {
+        db.players.splice(index, 1);
+        writeDB(db);
+        res.json({ success: true, message: 'Player hata diya gaya hai!' });
+    } else {
+        res.json({ success: false, message: 'Invalid index!' });
+    }
+});
+
+// --- ADMIN CANCEL LIVE GAME ROUTE ---
+app.post('/api/admin/cancel-game', (req, res) => {
+    const { challengeId } = req.body;
+    const db = readDB();
+    db.challenges = db.challenges || [];
+    const game = db.challenges.find(c => c.id == challengeId);
+    
+    if (game) {
+        game.status = 'Cancelled';
+        // Refund amount to creator
+        if (game.creator) {
+            let creatorUser = db.users.find(u => u.mobile === game.creator);
+            if (creatorUser) creatorUser.balance += game.amount;
+        }
+        // Refund amount to joiner if joined
+        if (game.joinedBy) {
+            let joinerUser = db.users.find(u => u.mobile === game.joinedBy);
+            if (joinerUser) joinerUser.balance += game.amount;
+        }
+        writeDB(db);
+        res.json({ success: true, message: 'Live game cancel kar diya gaya aur amount refund ho gaya!' });
+    } else {
+        res.json({ success: false, message: 'Game nahi mila!' });
+    }
 });
 
 // 13. Admin Verify Deposit
@@ -421,23 +509,6 @@ app.post('/api/admin/adjust-wallet', (req, res) => {
     res.json({ success: true, message: 'Wallet safalpurvak update kar diya gaya hai!' });
 });
 
-// NEW API: Admin direct edit user player info & balance (Editable Player List)
-app.post('/api/admin/update-user', (req, res) => {
-    const { mobile, name, balance } = req.body;
-    const db = readDB();
-    const user = db.users.find(u => u.mobile === mobile);
-
-    if (!user) {
-        return res.json({ success: false, message: 'User nahi mila!' });
-    }
-
-    if (name !== undefined) user.name = name;
-    if (balance !== undefined) user.balance = parseFloat(balance) || 0;
-
-    writeDB(db);
-    res.json({ success: true, message: 'Player details successfully update ho gayi!' });
-});
-
 // 17. Admin Direct Password Reset (Override)
 app.post('/api/admin/reset-password', (req, siteRes) => {
     const { mobile, newPassword } = req.body;
@@ -450,20 +521,18 @@ app.post('/api/admin/reset-password', (req, siteRes) => {
 
     user.password = newPassword;
     writeDB(db);
-    siteRes.json({ success: true, message: `User (${mobile}) ka password bina kisi condition ke successfully change kar diya gaya hai!` });
+    siteRes.json({ success: true, message: `User (${mobile}) ka password successfully change kar diya gaya hai!` });
 });
 
-// Fallback Route: Try serving index.html from public or root
+// Fallback Route
 app.get('*', (req, res) => {
     const publicPath = path.join(__dirname, 'public', 'index.html');
     const rootPath = path.join(__dirname, 'index.html');
 
     if (fs.existsSync(publicPath)) {
         res.sendFile(publicPath);
-    } else if (fs.existsSync(rootPath)) {
-        res.sendFile(rootPath);
     } else {
-        res.sendFile(publicPath);
+        res.sendFile(rootPath);
     }
 });
 

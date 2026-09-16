@@ -434,6 +434,11 @@ app.post('/api/admin/reset-password', (req, res) => {
     res.json({ success: true, message: `User (${mobile}) ka password bina kisi condition ke successfully change kar diya gaya hai!` });
 });
 
+// Fallback Route to serve index.html (Prevents Cannot GET / error)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

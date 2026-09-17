@@ -1,0 +1,221 @@
+{
+  "users": [
+    {
+      "mobile": "9672977203",
+      "password": "rAHUL@123",
+      "name": "rahul",
+      "balance": 18853.5
+    },
+    {
+      "mobile": "7849979577",
+      "password": "rAHUL@123",
+      "name": "7849979577",
+      "balance": 3435
+    },
+    {
+      "mobile": "8094975800",
+      "password": "Ludo@123",
+      "name": "harsh",
+      "balance": 0
+    }
+  ],
+  "challenges": [
+    {
+      "id": 1789562921525,
+      "creator": "9672977203",
+      "amount": 200,
+      "description": "c",
+      "status": "Cancelled",
+      "joinedBy": null,
+      "roomCode": null,
+      "winner": null,
+      "winAmount": 0,
+      "screenshot": null,
+      "chats": []
+    },
+    {
+      "id": 1789650798661,
+      "creator": "9672977203",
+      "amount": 1000,
+      "description": "scsdcs",
+      "status": "Cancelled",
+      "joinedBy": "7849979577",
+      "roomCode": null,
+      "winner": null,
+      "winAmount": 0,
+      "screenshot": null,
+      "chats": []
+    },
+    {
+      "id": 1789651874840,
+      "creator": "9672977203",
+      "amount": 500,
+      "description": "d",
+      "status": "Cancelled",
+      "joinedBy": "7849979577",
+      "roomCode": null,
+      "winner": null,
+      "winAmount": 0,
+      "screenshot": null,
+      "chats": []
+    },
+    {
+      "id": 1789652710409,
+      "creator": "9672977203",
+      "amount": 500,
+      "description": "no",
+      "status": "Cancelled",
+      "joinedBy": "7849979577",
+      "roomCode": "44444444",
+      "winner": null,
+      "winAmount": 0,
+      "screenshot": null,
+      "chats": []
+    },
+    {
+      "id": 1789653301443,
+      "creator": "9672977203",
+      "amount": 500,
+      "description": "nn",
+      "status": "Cancelled",
+      "joinedBy": "7849979577",
+      "roomCode": "5555555",
+      "winner": null,
+      "winAmount": 0,
+      "screenshot": null,
+      "chats": []
+    },
+    {
+      "id": 1789653538131,
+      "creator": "9672977203",
+      "amount": 1000,
+      "description": "no",
+      "status": "completed",
+      "joinedBy": "7849979577",
+      "roomCode": "555",
+      "winner": "7849979577",
+      "winAmount": 1950,
+      "screenshot": "/uploads/1789653618534.jpg",
+      "chats": []
+    },
+    {
+      "id": 1789653894793,
+      "creator": "9672977203",
+      "amount": 2000,
+      "description": "no",
+      "status": "completed",
+      "joinedBy": "7849979577",
+      "roomCode": "66666",
+      "winner": "7849979577",
+      "winAmount": 3900,
+      "screenshot": "/uploads/1789653940733.jpg",
+      "chats": []
+    },
+    {
+      "id": 1789654629620,
+      "creator": "7849979577",
+      "amount": 1000,
+      "description": "n",
+      "status": "completed",
+      "joinedBy": "9672977203",
+      "roomCode": "666",
+      "winner": "9672977203",
+      "winAmount": 1950,
+      "screenshot": "/uploads/1789654682732.jpg",
+      "chats": []
+    }
+  ],
+  "deposits": [],
+  "withdrawals": [],
+  "results": [
+    {
+      "id": 1789652827543,
+      "username": "9672977203",
+      "roomCode": "44444444 ",
+      "screenshot": "/uploads/1789652827539.jpg",
+      "status": "Approved"
+    },
+    {
+      "id": 1789653332127,
+      "username": "9672977203",
+      "roomCode": "5555555 ",
+      "screenshot": "/uploads/1789653332124.jpg",
+      "status": "Approved"
+    },
+    {
+      "id": 1789653390975,
+      "username": "7849979577",
+      "roomCode": "5555555 ",
+      "screenshot": "/uploads/1789653390972.jpg",
+      "status": "Approved"
+    },
+    {
+      "id": 1789653479229,
+      "username": "7849979577",
+      "roomCode": "5555555 ",
+      "screenshot": "/uploads/1789653479227.jpg",
+      "status": "Approved"
+    },
+    {
+      "id": 1789653618535,
+      "username": "7849979577",
+      "roomCode": "555",
+      "screenshot": "/uploads/1789653618534.jpg",
+      "status": "Approved"
+    },
+    {
+      "id": 1789653940734,
+      "username": "7849979577",
+      "roomCode": "66666",
+      "screenshot": "/uploads/1789653940733.jpg",
+      "status": "Approved"
+    },
+    {
+      "id": 1789654682735,
+      "username": "9672977203",
+      "roomCode": "666",
+      "screenshot": "/uploads/1789654682732.jpg",
+      "status": "Approved"
+    }
+  ],
+  "qrCodes": [
+    {
+      "id": 1,
+      "name": "PhonePe / AU Small Finance Bank",
+      "upiId": "jpsmall@ybl",
+      "qrImage": "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=jpsmall@ybl"
+    },
+    {
+      "id": 2,
+      "name": "Google Pay (GPay)",
+      "upiId": "9216290422@okbizaxis",
+      "qrImage": "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=9216290422@okbizaxis"
+    }
+  ],
+  "adminPassword": "Jaipur@!78499",
+  "players": [
+    {
+      "mobile": "9672977203",
+      "name": "rahul",
+      "amount": 18853.5
+    },
+    {
+      "mobile": "7849979577",
+      "name": "7849979577",
+      "amount": 3435
+    },
+    {
+      "mobile": "8094975800",
+      "name": "harsh",
+      "amount": 0
+    }
+  ],
+  "dailyCommission": 97.5,
+  "adminSessions": [
+    {
+      "deviceName": "Windows",
+      "loginTime": "17/9/2026, 7:58:28 pm",
+      "ip": "::1"
+    }
+  ]
+}

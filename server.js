@@ -9,19 +9,16 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from 'public' folder and root directory as backup
 app.use(express.static('public'));
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Ensure uploads directory exists
 if (!fs.existsSync('./uploads')) {
     fs.mkdirSync('./uploads');
 }
 
-const STORAGE_FILE = './database.json';
+const STORAGE_FILE = path.join(__dirname, 'database.json');
 
-// Helper to read database
 function readDB() {
     if (!fs.existsSync(STORAGE_FILE)) {
         const initialData = {
@@ -34,30 +31,46 @@ function readDB() {
                 { id: 1, name: 'PhonePe / AU Small Finance Bank', upiId: 'jpsmall@ybl', qrImage: 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=jpsmall@ybl' },
                 { id: 2, name: 'Google Pay (GPay)', upiId: '9216290422@okbizaxis', qrImage: 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=9216290422@okbizaxis' }
             ],
-            adminPassword: 'Jaipur@!78499'
+            adminPassword: 'Jaipur@!78499',
+            players: [],
+            dailyCommission: 0,
+            adminSessions: []
         };
         fs.writeFileSync(STORAGE_FILE, JSON.stringify(initialData, null, 2));
     }
-    const data = fs.readFileSync(STORAGE_FILE);
-    let db = JSON.parse(data);
-    db.players = db.players || [];
-    db.adminPassword = db.adminPassword || 'Jaipur@!78499';
-    return db;
+    try {
+        const data = fs.readFileSync(STORAGE_FILE, 'utf8');
+        let db = JSON.parse(data);
+        db.players = db.players || [];
+        db.users = db.users || [];
+        db.challenges = db.challenges || [];
+        db.deposits = db.deposits || [];
+        db.withdrawals = db.withdrawals || [];
+        db.results = db.results || [];
+        db.qrCodes = db.qrCodes || [];
+        db.adminPassword = db.adminPassword || 'Jaipur@!78499';
+        db.dailyCommission = typeof db.dailyCommission === 'number' ? db.dailyCommission : 0;
+        db.adminSessions = db.adminSessions || [];
+        return db;
+    } catch (err) {
+        return { users: [], challenges: [], deposits: [], withdrawals: [], results: [], qrCodes: [], players: [], adminPassword: 'Jaipur@!78499', dailyCommission: 0, adminSessions: [] };
+    }
 }
 
-// Helper to write database
 function writeDB(data) {
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(data, null, 2));
+    try {
+        fs.writeFileSync(STORAGE_FILE, JSON.stringify(data, null, 2));
+    } catch (err) {
+        console.error("Database write error:", err);
+    }
 }
 
-// Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, './uploads/'),
     filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
 const upload = multer({ storage: storage });
 
-// Password validation helper
 function isValidPassword(password) {
     if (!password || password.length < 8 || password.length > 12) return false;
     const hasLower = /[a-z]/.test(password);
@@ -67,7 +80,6 @@ function isValidPassword(password) {
     return hasLower && hasUpper && hasDigit && hasSpecial;
 }
 
-// 1. User Register / Login
 app.post('/api/user/auth', (req, res) => {
     const { mobile, password, name } = req.body;
     const db = readDB();
@@ -101,7 +113,6 @@ app.post('/api/user/auth', (req, res) => {
     }
 });
 
-// 2. Get User Details & Balance
 app.get('/api/user/:mobile', (req, res) => {
     const db = readDB();
     const user = db.users.find(u => u.mobile === req.params.mobile);
@@ -112,7 +123,6 @@ app.get('/api/user/:mobile', (req, res) => {
     }
 });
 
-// 3. Update Password
 app.post('/api/user/update-password', (req, res) => {
     const { mobile, oldPassword, newPassword } = req.body;
     const db = readDB();
@@ -133,7 +143,6 @@ app.post('/api/user/update-password', (req, res) => {
     res.json({ success: true, message: 'Password safalpurvak update ho gaya!' });
 });
 
-// 4. Create Challenge
 app.post('/api/challenge/create', (req, res) => {
     const { username, amount, description } = req.body;
     const db = readDB();
@@ -146,6 +155,9 @@ app.post('/api/challenge/create', (req, res) => {
     }
 
     user.balance -= amt;
+
+    let pItem = db.players.find(p => p.mobile === username);
+    if (pItem) pItem.amount = user.balance;
 
     const newChallenge = {
         id: Date.now(),
@@ -166,7 +178,6 @@ app.post('/api/challenge/create', (req, res) => {
     res.json({ success: true, message: 'Challenge safalpurvak live kar diya gaya hai!' });
 });
 
-// 5. Join Challenge
 app.post('/api/challenge/join', (req, res) => {
     const { challengeId, username } = req.body;
     const db = readDB();
@@ -186,6 +197,10 @@ app.post('/api/challenge/join', (req, res) => {
     }
 
     user.balance -= challenge.amount;
+
+    let pItem = db.players.find(p => p.mobile === username);
+    if (pItem) pItem.amount = user.balance;
+
     challenge.joinedBy = username;
     challenge.status = 'Running';
 
@@ -193,7 +208,6 @@ app.post('/api/challenge/join', (req, res) => {
     res.json({ success: true, message: 'Aapne challenge safalpurvak join kar liya hai!' });
 });
 
-// 6. Submit Room Code by Creator
 app.post('/api/challenge/roomcode', (req, res) => {
     const { challengeId, roomCode, username } = req.body;
     const db = readDB();
@@ -207,6 +221,10 @@ app.post('/api/challenge/roomcode', (req, res) => {
         return res.json({ success: false, message: 'Sirf creator hi room code bhej sakta hai!' });
     }
 
+    if (!roomCode || roomCode.length !== 8 || !/^\d+$/.test(roomCode)) {
+        return res.json({ success: false, message: 'Room code thik 8 digits ka numeric hona anivarya hai!' });
+    }
+
     challenge.roomCode = roomCode;
     challenge.status = 'Playing';
 
@@ -214,7 +232,6 @@ app.post('/api/challenge/roomcode', (req, res) => {
     res.json({ success: true, message: 'Room code safalpurvak bhej diya gaya hai!' });
 });
 
-// 7. Challenge Chat Message
 app.post('/api/challenge/chat', (req, res) => {
     const { challengeId, sender, message } = req.body;
     const db = readDB();
@@ -231,9 +248,8 @@ app.post('/api/challenge/chat', (req, res) => {
     res.json({ success: true });
 });
 
-// 8. Submit Deposit Request
 app.post('/api/deposit', upload.single('screenshot'), (req, res) => {
-    const { username, amount, utr } = req.body;
+    const { username, amount } = req.body;
     const screenshot = req.file ? `/uploads/${req.file.filename}` : '';
     const db = readDB();
 
@@ -241,7 +257,6 @@ app.post('/api/deposit', upload.single('screenshot'), (req, res) => {
         id: Date.now(),
         username,
         amount: parseFloat(amount),
-        utr,
         screenshot,
         status: 'Pending',
         date: new Date().toLocaleString()
@@ -251,7 +266,6 @@ app.post('/api/deposit', upload.single('screenshot'), (req, res) => {
     res.json({ success: true, message: 'Deposit request bhej di gayi hai! Admin verify karega.' });
 });
 
-// 9. Submit Withdrawal Request
 app.post('/api/withdraw', upload.single('qrScreenshot'), (req, res) => {
     const { username, amount, method, upiId, mobileNumber, appChoice } = req.body;
     const qrScreenshot = req.file ? `/uploads/${req.file.filename}` : '';
@@ -265,6 +279,9 @@ app.post('/api/withdraw', upload.single('qrScreenshot'), (req, res) => {
     }
 
     user.balance -= amt;
+
+    let pItem = db.players.find(p => p.mobile === username);
+    if (pItem) pItem.amount = user.balance;
 
     db.withdrawals.push({
         id: Date.now(),
@@ -283,7 +300,6 @@ app.post('/api/withdraw', upload.single('qrScreenshot'), (req, res) => {
     res.json({ success: true, message: 'Withdrawal request safalpurvak bhej di gayi hai!' });
 });
 
-// 10. Submit Game Win Proof Result
 app.post('/api/submit-result', upload.single('screenshot'), (req, res) => {
     const { username, roomCode } = req.body;
     const screenshot = req.file ? `/uploads/${req.file.filename}` : '';
@@ -301,21 +317,40 @@ app.post('/api/submit-result', upload.single('screenshot'), (req, res) => {
     res.json({ success: true, message: 'Win proof screenshot submit ho gaya hai! Admin verify karega.' });
 });
 
-// 11. Admin Login
 app.post('/api/admin/login', (req, res) => {
-    const { password } = req.body;
+    const { password, deviceName } = req.body;
     const db = readDB();
     if (password === db.adminPassword || password === 'Jaipur@!78499') {
-        res.json({ success: true });
+        db.adminSessions = db.adminSessions || [];
+        const devName = deviceName || 'Unknown Device';
+        const existingSession = db.adminSessions.find(s => s.deviceName === devName);
+        if (!existingSession) {
+            db.adminSessions.push({
+                deviceName: devName,
+                loginTime: new Date().toLocaleString(),
+                ip: req.ip || 'Direct'
+            });
+        }
+        writeDB(db);
+        res.json({ success: true, sessionsCount: db.adminSessions.length });
     } else {
         res.json({ success: false, message: 'Galat admin password!' });
     }
 });
 
-// 12. Get All Admin Data (Including players list for Player Manager)
 app.get('/api/admin/data', (req, res) => {
     const db = readDB();
-    db.players = db.players || db.users.map(u => ({ mobile: u.mobile, name: u.name, amount: u.balance }));
+    db.users.forEach(u => {
+        let p = db.players.find(pl => pl.mobile === u.mobile);
+        if (p) {
+            p.amount = u.balance;
+            p.name = u.name || p.name;
+        } else {
+            db.players.push({ mobile: u.mobile, name: u.name || 'Player', amount: u.balance });
+        }
+    });
+    writeDB(db);
+
     res.json({
         challenges: db.challenges,
         deposits: db.deposits,
@@ -323,11 +358,12 @@ app.get('/api/admin/data', (req, res) => {
         results: db.results,
         qrCodes: db.qrCodes,
         players: db.players,
-        users: db.users.map(u => ({ mobile: u.mobile, name: u.name, balance: u.balance }))
+        users: db.users.map(u => ({ mobile: u.mobile, name: u.name, balance: u.balance })),
+        dailyCommission: db.dailyCommission || 0,
+        adminSessions: db.adminSessions || []
     });
 });
 
-// --- PLAYER LIST MANAGER API ENDPOINTS ---
 app.post('/api/admin/players/add', (req, res) => {
     const { mobile, name, amount } = req.body;
     const db = readDB();
@@ -382,31 +418,46 @@ app.post('/api/admin/players/delete', (req, res) => {
     }
 });
 
-// --- ADMIN CANCEL LIVE GAME ROUTE ---
+app.post('/api/admin/reset-commission', (req, res) => {
+    const db = readDB();
+    db.dailyCommission = 0;
+    writeDB(db);
+    res.json({ success: true, message: 'Daily commission counter successfully reset ho gaya!' });
+});
+
 app.post('/api/admin/cancel-game', (req, res) => {
-    const { challengeId } = req.body;
+    const { challengeId, refundOption } = req.body;
     const db = readDB();
     db.challenges = db.challenges || [];
     const game = db.challenges.find(c => c.id == challengeId);
     
     if (game) {
         game.status = 'Cancelled';
-        if (game.creator) {
+        
+        if ((refundOption === 'creator' || refundOption === 'both') && game.creator) {
             let creatorUser = db.users.find(u => u.mobile === game.creator);
-            if (creatorUser) creatorUser.balance += game.amount;
+            if (creatorUser) {
+                creatorUser.balance += game.amount;
+                let p = db.players.find(pl => pl.mobile === game.creator);
+                if (p) p.amount = creatorUser.balance;
+            }
         }
-        if (game.joinedBy) {
+        if ((refundOption === 'joiner' || refundOption === 'both') && game.joinedBy) {
             let joinerUser = db.users.find(u => u.mobile === game.joinedBy);
-            if (joinerUser) joinerUser.balance += game.amount;
+            if (joinerUser) {
+                joinerUser.balance += game.amount;
+                let p = db.players.find(pl => pl.mobile === game.joinedBy);
+                if (p) p.amount = joinerUser.balance;
+            }
         }
+
         writeDB(db);
-        res.json({ success: true, message: 'Live game cancel kar diya gaya aur amount refund ho gaya!' });
+        res.json({ success: true, message: 'Live game cancel kar diya gaya aur chunav ke anusaار refund process ho gaya!' });
     } else {
         res.json({ success: false, message: 'Game nahi mila!' });
     }
 });
 
-// 13. Admin Verify Deposit
 app.post('/api/admin/verify-deposit', (req, res) => {
     const { depositId, action } = req.body;
     const db = readDB();
@@ -419,7 +470,11 @@ app.post('/api/admin/verify-deposit', (req, res) => {
     if (action === 'Approve') {
         deposit.status = 'Approved';
         const user = db.users.find(u => u.mobile === deposit.username);
-        if (user) user.balance += deposit.amount;
+        if (user) {
+            user.balance += deposit.amount;
+            let p = db.players.find(pl => pl.mobile === deposit.username);
+            if (p) p.amount = user.balance;
+        }
     } else {
         deposit.status = 'Rejected';
     }
@@ -428,7 +483,6 @@ app.post('/api/admin/verify-deposit', (req, res) => {
     res.json({ success: true, message: `Deposit ${action} kar diya gaya hai.` });
 });
 
-// 14. Admin Verify Withdrawal
 app.post('/api/admin/verify-withdrawal', (req, res) => {
     const { withdrawalId, action } = req.body;
     const db = readDB();
@@ -443,14 +497,17 @@ app.post('/api/admin/verify-withdrawal', (req, res) => {
     } else {
         withdrawal.status = 'Rejected';
         const user = db.users.find(u => u.mobile === withdrawal.username);
-        if (user) user.balance += withdrawal.amount;
+        if (user) {
+            user.balance += withdrawal.amount;
+            let p = db.players.find(pl => pl.mobile === withdrawal.username);
+            if (p) p.amount = user.balance;
+        }
     }
 
     writeDB(db);
     res.json({ success: true, message: `Withdrawal ${action} kar diya gaya hai.` });
 });
 
-// 15. Admin Verify Result & Pay Winner
 app.post('/api/admin/verify-result', (req, res) => {
     const { resultId, action, winAmount, username } = req.body;
     const db = readDB();
@@ -462,29 +519,42 @@ app.post('/api/admin/verify-result', (req, res) => {
 
     if (action === 'Approve') {
         resultItem.status = 'Approved';
-        const amt = parseFloat(winAmount);
+        const rawWinAmt = parseFloat(winAmount) || 0;
+        
+        const commission = rawWinAmt * 0.05;
+        const netWinAmount = rawWinAmt - commission;
+
+        db.dailyCommission = (db.dailyCommission || 0) + commission;
         
         const challenge = db.challenges.find(c => c.roomCode === resultItem.roomCode);
         if (challenge) {
             challenge.status = 'completed';
             challenge.winner = username;
-            challenge.winAmount = amt;
+            challenge.winAmount = rawWinAmt;
             challenge.screenshot = resultItem.screenshot;
         }
 
         const user = db.users.find(u => u.mobile === username);
         if (user) {
-            user.balance += amt;
+            user.balance += netWinAmount;
         }
+
+        db.players = db.players || [];
+        let pItem = db.players.find(p => p.mobile === username);
+        if (pItem) {
+            pItem.amount = user ? user.balance : (Number(pItem.amount) + netWinAmount);
+        } else {
+            db.players.push({ mobile: username, name: user ? user.name : 'Player', amount: user ? user.balance : netWinAmount });
+        }
+
     } else {
         resultItem.status = 'Rejected';
     }
 
     writeDB(db);
-    res.json({ success: true, message: 'Result safalpurvak process ho gaya hai!' });
+    res.json({ success: true, message: 'Result safalpurvak process ho gaya hai! 5% commission kaat kar balance update kar diya gaya hai.' });
 });
 
-// 16. Admin Manual Wallet Adjust
 app.post('/api/admin/adjust-wallet', (req, res) => {
     const { username, amount, type } = req.body;
     const db = readDB();
@@ -501,11 +571,13 @@ app.post('/api/admin/adjust-wallet', (req, res) => {
         user.balance = Math.max(0, user.balance - amt);
     }
 
+    let p = db.players.find(pl => pl.mobile === username);
+    if (p) p.amount = user.balance;
+
     writeDB(db);
     res.json({ success: true, message: 'Wallet safalpurvak update kar diya gaya hai!' });
 });
 
-// 17. Admin Direct Password Reset (Override)
 app.post('/api/admin/reset-password', (req, siteRes) => {
     const { mobile, newPassword } = req.body;
     const db = readDB();
@@ -520,7 +592,6 @@ app.post('/api/admin/reset-password', (req, siteRes) => {
     siteRes.json({ success: true, message: `User (${mobile}) ka password successfully change kar diya gaya hai!` });
 });
 
-// Fallback Route
 app.get('*', (req, res) => {
     const publicPath = path.join(__dirname, 'public', 'index.html');
     const rootPath = path.join(__dirname, 'index.html');

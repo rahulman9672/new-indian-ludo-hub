@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Indian Ludo Hub - Tournament & Wallet Platform</title>
+    <!-- Include jsPDF Library for Reliable PDF Exports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -27,6 +29,22 @@
             color: var(--text-main); 
         }
 
+        .session-timer-bar {
+            background: #ef4444;
+            color: white;
+            text-align: center;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
         header { 
             background: linear-gradient(90deg, #4f46e5, #9333ea); 
             color: white; 
@@ -39,7 +57,6 @@
             overflow: hidden;
         }
 
-        /* Live Pulsing Badge Effect */
         .live-indicator {
             display: inline-flex;
             align-items: center;
@@ -217,18 +234,6 @@
             border-radius: 8px; 
         }
 
-        .warning-box { 
-            background: #fef2f2; 
-            color: #991b1b; 
-            padding: 14px; 
-            border: 1px solid #fecaca; 
-            border-radius: 10px; 
-            font-size: 12px; 
-            margin-top: 20px; 
-            text-align: center; 
-            line-height: 1.5;
-        }
-
         .trusted-badge {
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             border: 1px solid #bbf7d0;
@@ -290,7 +295,6 @@
         .auth-section { display: none; }
         .auth-section.active { display: block; }
 
-        /* Player Table Styling */
         .player-table {
             width: 100%;
             border-collapse: collapse;
@@ -306,10 +310,7 @@
             text-align: left;
             font-size: 13px;
         }
-        .player-table th {
-            background: #f1f5f9;
-            color: #334155;
-        }
+        .player-table th { background: #f1f5f9; color: #334155; }
         .player-table input {
             margin: 0;
             padding: 6px;
@@ -318,12 +319,8 @@
             font-size: 13px;
             width: 100%;
         }
-        .player-table input:focus {
-            background: #fff;
-            border-color: var(--primary);
-        }
+        .player-table input:focus { background: #fff; border-color: var(--primary); }
 
-        /* Popup Modal Styling for Warnings */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -369,52 +366,46 @@
             font-size: 13px;
             line-height: 1.6;
         }
-        .modal-content ul li {
-            margin-bottom: 8px;
-        }
+        .modal-content ul li { margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- Warning & Terms Popup Modal -->
     <div id="warning-modal" class="modal-overlay">
         <div class="modal-content">
             <h3>⚠️ ZAROORI SUCHNA & WARNINGS</h3>
             <p style="text-align: center; font-size: 12px; color: #64748b; margin-top: -5px;">Kripya platform use karne se pehle in niyamon ko dhyan se padhein:</p>
-            
             <ul>
-                <li><b>18+ Age Limit:</b> Yeh website sirf 18 saal ya usse zyada umar ke users ke liye hai. Chote bache isse door rahein.</li>
-                <li><b>Financial Risk:</b> Is platform par financial risk shamil hai. Apni zimmedari aur apni marzi se khelein, nuksan hone par admin zimmedar nahi hoga.</li>
-                <li><b>Deposit Rules:</b> Payment deposit karne ke baad <b>UTR number aur Screenshot (SS)</b> zaroor bharein. Bina UTR/SS ke deposit approve nahi kiya jayega.</li>
-                <li><b>Wallet Update Time:</b> Deposit request submit karne ke baad wallet update hone mein lagbhag <b>10 minutes</b> ka samay lag sakta hai. Kripya sabr rakhein.</li>
-                <li><b>Withdrawal Details:</b> Withdrawal lagate samay apni UPI ID, Mobile Number ya QR code ko dhyan se verify kar lein. Galat details ki wajah se payment failure ki zimmedari user ki hogi.</li>
-                <li><b>Withdrawal Time:</b> Withdrawal request lagane ke baad <b>10 minutes</b> ke andar aapke account mein payment bhej diya jayega.</li>
-                <li><b>Fair Play:</b> Kisi bhi tarah ki cheating, hacking ya galat screenshot bhejne par aapki ID bina kisi warning ke block kar di jayega aur balance zapt ho jayega.</li>
+                <li><b>18+ Age Limit:</b> Yeh website sirf 18 saal ya usse zyada umar ke users ke liye hai.</li>
+                <li><b>Financial Risk:</b> Is platform par financial risk shamil hai. Apni zimmedari aur apni marzi se khelein.</li>
+                <li><b>Deposit Rules:</b> Payment deposit karne ke baad <b>Screenshot (SS)</b> zaroor upload karein. Bina SS ke deposit approve nahi hoga.</li>
+                <li><b>Wallet Update Time:</b> Deposit request submit karne ke baad wallet update hone mein <b>10 minutes</b> ka samay lag sakta hai.</li>
+                <li><b>Withdrawal Details:</b> Withdrawal lagate samay apni UPI ID, Mobile Number ya QR code ko dhyan se verify kar lein.</li>
+                <li><b>Withdrawal Time:</b> Withdrawal request lagane ke baad <b>10 minutes</b> ke andar payment bhej diya jayega.</li>
+                <li><b>Fair Play:</b> Cheating ya galat screenshot bhejne par ID block kar di jayegi aur balance zapt ho jayega.</li>
             </ul>
-
             <button class="btn" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); margin-top: 10px;" onclick="closeWarningModal()">Maine Sabhi Niyam Padhe Aur Maane (Agree)</button>
         </div>
     </div>
 
-    <!-- Permanent Floating Telegram Widget -->
     <a href="https://t.me/+Ph5IDyxzZWA1ZjNl" target="_blank" class="floating-telegram" title="Join Telegram Support">
-        <svg viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.25.37-.51 1.02-.78 4-1.74 6.67-2.89 8.01-3.46 3.81-1.62 4.6-1.9 5.11-1.91.11 0 .37.03.54.17.14.12.18.28.2.4-.02.07-.02.13-.04.22z"/>
-        </svg>
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.25.37-.51 1.02-.78 4-1.74 6.67-2.89 8.01-3.46 3.81-1.62 4.6-1.9 5.11-1.91.11 0 .37.03.54.17.14.12.18.28.2.4-.02.07-.02.13-.04.22z"/></svg>
     </a>
+
+    <div id="session-timer-bar" class="session-timer-bar">
+        <span>⏰ Session Auto Logout in: <strong id="session-countdown-display">60:00</strong></span>
+    </div>
 
    <header>
         <div class="live-indicator"><div class="pulse-dot"></div> LIVE TOURNAMENT ARENA</div>
         <h2>🎲 New Indian Ludo Hub 🔴🟢🔵🟡</h2>
         <p id="user-display">Logged in as: <span id="current-user-phone" style="font-weight: 600;">Guest</span></p>
-        <button onclick="logoutUser()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 4px 12px; font-size: 12px; border-radius: 6px; cursor: pointer; margin-top: 8px; font-weight: 600; transition: 0.2s;">Logout</button>
+        <button onclick="logoutUser()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 4px 12px; font-size: 12px; border-radius: 6px; cursor: pointer; margin-top: 8px; font-weight: 600;">Logout</button>
     </header>
 
     <div id="auth-container" class="container" style="max-width: 420px; margin-top: 30px;">
         <div class="dice-banner">🎲 🔴 🟢 🔵 🟡 🎲</div>
-        <div class="trusted-badge">
-            🛡️ 100% Trusted & Secure Ludo Tournament Platform
-        </div>
+        <div class="trusted-badge">🛡️ 100% Trusted & Secure Ludo Tournament Platform</div>
         <h2 style="text-align: center; color: #1e293b; margin-top: 5px; margin-bottom: 15px; font-size: 22px;">Welcome Gamer! 👋</h2>
 
         <div class="auth-tabs">
@@ -426,13 +417,10 @@
             <h3 style="text-align: center; margin-top: 0; color: #1e293b;">📝 Naya Account Banayein</h3>
             <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Aapka Naam (Name):</label>
             <input type="text" id="reg-name" placeholder="Apna Naam Likhein">
-
             <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Mobile Number (10 Digits):</label>
             <input type="text" id="reg-phone" placeholder="Mobile Number" maxlength="10">
-
             <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Password:</label>
             <input type="password" id="reg-password" placeholder="Password (e.g. Ludo@123)">
-
             <button class="btn" onclick="registerUser()">Sign In / Register Karein</button>
         </div>
 
@@ -440,15 +428,9 @@
             <h3 style="text-align: center; margin-top: 0; color: #1e293b;">🔐 Account Login</h3>
             <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Mobile Number (10 Digits):</label>
             <input type="text" id="login-phone" placeholder="Mobile Number" maxlength="10">
-
             <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Password:</label>
             <input type="password" id="login-password" placeholder="Aapka Password">
-
-            <button class="btn" style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);" onclick="loginUser()">Login Karein</button>
-        </div>
-
-        <div class="warning-box">
-            ⚠️ <b>CHETWANI (WARNING):</b> User hamesha ek strong password lagayein. Agar password weak hone ki wajah se ID hack hoti hai ya koi nuksan hota hai, toh iski saari zimmedari admin ki nahi hogi!
+            <button class="btn" style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);" onclick="loginUser()">Login Karein</button>
         </div>
     </div>
 
@@ -482,10 +464,10 @@
                 <h4 style="margin-top: 0; color: #b45309;">🏆 Match Jeetne par Screenshot Bhejein (Proof)</h4>
                 <form id="result-form" onsubmit="submitGameResult(event)">
                     <input type="text" id="res-username" readonly style="background: #fef9c3; color: #78350f;">
-                    <input type="text" id="res-room" placeholder="Room Code jisme khele the" required>
+                    <input type="text" id="res-room" placeholder="Room Code jisme khele the (8 Digits)" maxlength="8" required>
                     <label style="font-size: 12px; font-weight: 700; color: #92400e;">Jeetne ka Screenshot (Winning Screen):</label>
                     <input type="file" id="res-screenshot" accept="image/*" required style="background: white;">
-                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">Winning Screenshot Submit Karein</button>
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">Winning Screenshot Submit Karein</button>
                 </form>
             </div>
         </div>
@@ -496,7 +478,10 @@
         </div>
 
         <div id="sec-txhistory" class="section">
-            <h3 style="color: #1e293b; margin-top: 0;">📊 Deposit & Withdrawal History</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="color: #1e293b; margin: 0;">📊 Transactions History</h3>
+                <button onclick="downloadUserTransactionsPDF()" class="btn" style="width: auto; padding: 6px 12px; font-size: 12px; background: #2563eb;">📄 Download PDF</button>
+            </div>
             <h4 style="color: #334155;">💰 Deposit History:</h4>
             <div id="user-deposit-history">Loading Deposits...</div>
             <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
@@ -507,12 +492,13 @@
         <div id="sec-wallet" class="section">
             <div class="wallet-banner" id="wallet-balance-box">Aapka Balance: ₹0</div>
             <h3 style="color: #1e293b; margin-top: 0;">💰 Add Money (Scan QR & Pay)</h3>
-            <div id="qr-codes-container">Loading QRs...</div>
-
+            
             <form id="deposit-form" onsubmit="submitDeposit(event)" style="margin-top: 15px;">
                 <input type="text" id="dep-username" readonly style="background: #f1f5f9; color: #64748b;">
-                <input type="number" id="dep-amount" placeholder="Amount Added (₹)" required>
-                <input type="text" id="dep-utr" placeholder="12 digit UTR / Transaction ID" required>
+                <input type="number" id="dep-amount" placeholder="Amount Added (₹)" required oninput="updateDynamicQR(this.value)">
+                
+                <div id="qr-codes-container" style="display: none; margin-bottom: 15px;"></div>
+
                 <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Payment Screenshot:</label>
                 <input type="file" id="dep-screenshot" accept="image/*" required style="background: white;">
                 <button type="submit" class="btn">Deposit Request Bhejein</button>
@@ -552,7 +538,7 @@
                     <input type="file" id="wd-qr-screenshot" accept="image/*" style="background: white;">
                 </div>
 
-                <button type="submit" class="btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); margin-top: 10px;">Withdrawal Request Bhejein</button>
+                <button type="submit" class="btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); margin-top: 10px;">Withdrawal Request Bhejein</button>
             </form>
         </div>
 
@@ -572,11 +558,9 @@
                 <form onsubmit="updatePassword(event)">
                     <label style="font-size: 12px; font-weight: 700; color: #1e3a8a;">Purana Password:</label>
                     <input type="password" id="old-password" placeholder="Purana Password Daalein" required style="background: white;">
-
                     <label style="font-size: 12px; font-weight: 700; color: #1e3a8a;">Naya Password (8-12 chars, Case-Sensitive, Letters+Digits+Special):</label>
                     <input type="password" id="new-password" placeholder="Naya Password Daalein" required style="background: white;">
-
-                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); margin-top: 10px;">Password Update Karein</button>
+                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); margin-top: 10px;">Password Update Karein</button>
                 </form>
             </div>
         </div>
@@ -585,7 +569,7 @@
             <div id="admin-login-box">
                 <h3 style="color: #1e293b; margin-top: 0;">🔐 Admin Panel Secure Login</h3>
                 <input type="password" id="admin-password-input" placeholder="Enter Secure Password">
-                <button class="btn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);" onclick="verifyAdminLogin()">Login Karein</button>
+                <button class="btn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);" onclick="verifyAdminLogin()">Login Karein</button>
             </div>
 
             <div id="admin-dashboard-content" style="display: none;">
@@ -593,20 +577,20 @@
                 <button onclick="logoutAdmin()" style="background: var(--danger); color: white; border: none; padding: 6px 14px; border-radius: 6px; float: right; cursor: pointer; font-weight: 600;">Logout</button>
                 <div style="clear: both;"></div>
 
-                <!-- Admin Internal Tabs for Features -->
-                <div style="display: flex; gap: 6px; margin: 15px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
-                    <button class="btn" style="background: var(--primary); padding: 8px; font-size: 13px;" onclick="switchAdminSubTab('dashboard')">Dashboard & Requests</button>
-                    <button class="btn" style="background: #64748b; padding: 8px; font-size: 13px;" onclick="switchAdminSubTab('playerlist')">👥 Player List Manager</button>
+                <div style="display: flex; gap: 6px; margin: 15px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; flex-wrap: wrap;">
+                    <button class="btn" style="background: var(--primary); padding: 8px; font-size: 12px; width: auto;" onclick="switchAdminSubTab('dashboard')">Dashboard & Requests</button>
+                    <button class="btn" style="background: #10b981; padding: 8px; font-size: 12px; width: auto;" onclick="switchAdminSubTab('livegames')">🎮 Live & Completed Games View</button>
+                    <button class="btn" style="background: #64748b; padding: 8px; font-size: 12px; width: auto;" onclick="switchAdminSubTab('playerlist')">👥 Player Manager</button>
+                    <button class="btn" style="background: #0284c7; padding: 8px; font-size: 12px; width: auto;" onclick="switchAdminSubTab('regusers')">📋 Registered Users</button>
+                    <button class="btn" style="background: #9333ea; padding: 8px; font-size: 12px; width: auto;" onclick="switchAdminSubTab('admindevices')">💻 Admin Devices</button>
                 </div>
 
-                <!-- SubTab 1: Dashboard -->
                 <div id="admin-subtab-dashboard">
                     <div style="background: #fffbeb; padding: 18px; border: 1px solid #fef3c7; border-radius: 12px; margin-top: 15px; margin-bottom: 24px;">
                         <h4 style="margin-top: 0; color: #b45309;">🔑 User Password Direct Reset (Admin Override)</h4>
-                        <p style="font-size: 12px; color: #78350f;">Agar koi user password bhul jaye ya issue aaye, toh uska mobile number daal kar bina kisi condition ke naya password set karein:</p>
                         <input type="text" id="adm-reset-mobile" placeholder="User ka 10-Digit Mobile Number" maxlength="10" style="background: white;">
-                        <input type="text" id="adm-reset-newpass" placeholder="Naya Password (New Password)" style="background: white;">
-                        <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; font-weight: 700; margin-top: 5px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);" onclick="adminResetUserPassword()">Password Direct Reset Karein</button>
+                        <input type="text" id="adm-reset-newpass" placeholder="Naya Password" style="background: white;">
+                        <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; font-weight: 700; margin-top: 5px;" onclick="adminResetUserPassword()">Password Direct Reset Karein</button>
                     </div>
 
                     <h4 style="color: #334155;">🎮 Live Games Control (Cancel / Issues):</h4>
@@ -633,39 +617,86 @@
                             <option value="add">Add Balance</option>
                             <option value="deduct">Deduct Balance</option>
                         </select>
-                        <button class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onclick="adjustWallet()">Wallet Update Karein</button>
+                        <button class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);" onclick="adjustWallet()">Wallet Update Karein</button>
                     </div>
                 </div>
 
-                <!-- SubTab 2: Player List Manager -->
+                <div id="admin-subtab-livegames" style="display: none;">
+                    <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="margin: 0; color: #1e293b;">🎮 Live & Completed Games Full View</h4>
+                            <button onclick="downloadAdminGamesPDF()" class="btn" style="width: auto; padding: 6px 12px; font-size: 12px; background: #2563eb;">📄 Download PDF</button>
+                        </div>
+                        <p style="font-size: 12px; color: #64748b;">Yahan running games upar aur completed games niche sorted hain:</p>
+                        <div id="admin-live-games-full">Loading Games...</div>
+                    </div>
+                </div>
+
                 <div id="admin-subtab-playerlist" style="display: none;">
                     <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 15px;">
-                        <h4 style="margin-top: 0; color: #1e293b;">📋 All Registered / Managed Players Table</h4>
-                        <p style="font-size: 12px; color: #64748b;">Aap yahan naye players add kar sakte hain aur table mein direkt click karke kisi ka bhi Mobile Number, Name, ya Amount edit kar sakte hain:</p>
                         
-                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                            <input type="text" id="new-p-mobile" placeholder="Mobile Number (10 Digits)" maxlength="10" style="margin:0; background:white;">
-                            <input type="text" id="new-p-name" placeholder="Player Name" style="margin:0; background:white;">
-                            <input type="number" id="new-p-amount" placeholder="Amount (₹)" style="margin:0; background:white;">
-                            <button class="btn" style="width: auto; padding: 8px 16px; background: #16a34a;" onclick="addNewPlayerRow()">+ Add Player</button>
+                        <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 14px 18px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);">
+                            <div>
+                                <span style="font-size: 13px; opacity: 0.9;">💰 Pure Din ka Total Commission (5%):</span><br>
+                                <strong id="daily-commission-display" style="font-size: 22px;">₹0</strong>
+                            </div>
+                            <button class="btn" style="width: auto; background: #dc2626; padding: 6px 12px; font-size: 12px; box-shadow: none;" onclick="resetCommissionCounter()">🔄 Reset Counter</button>
                         </div>
 
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="margin: 0; color: #1e293b;">📋 Player List Manager Table</h4>
+                            <button onclick="downloadAdminPlayersPDF()" class="btn" style="width: auto; padding: 6px 12px; font-size: 12px; background: #2563eb;">📄 Download PDF</button>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                            <input type="text" id="new-p-mobile" placeholder="Mobile Number" maxlength="10" style="margin:0; background:white;">
+                            <input type="text" id="new-p-name" placeholder="Name" style="margin:0; background:white;">
+                            <input type="number" id="new-p-amount" placeholder="Amount (₹)" style="margin:0; background:white;">
+                            <button class="btn" style="width: auto; padding: 8px 16px; background: #16a34a;" onclick="addNewPlayerRow()">+ Add</button>
+                        </div>
                         <div style="overflow-x: auto;">
                             <table class="player-table">
                                <thead>
                                    <tr>
-                                       <th style="width: 30%;">Mobile Number</th>
-                                       <th style="width: 35%;">Name</th>
-                                       <th style="width: 25%;">Amount (₹)</th>
-                                       <th style="width: 10%;">Action</th>
+                                       <th>Mobile Number</th>
+                                       <th>Name</th>
+                                       <th>Amount (₹)</th>
+                                       <th>Action</th>
                                    </tr>
                                </thead>
-                               <tbody id="admin-players-tbody">
-                                   <!-- Dynamic Rows -->
-                               </tbody>
+                               <tbody id="admin-players-tbody"></tbody>
                             </table>
                         </div>
-                        <button class="btn" style="margin-top: 15px; background: #2563eb;" onclick="savePlayerListChanges()">💾 Sabhi Changes Save Karein</button>
+                        <button class="btn" style="margin-top: 15px; background: #2563eb;" onclick="savePlayerListChanges()">💾 Save Changes</button>
+                    </div>
+                </div>
+
+                <div id="admin-subtab-regusers" style="display: none;">
+                    <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="margin: 0; color: #1e293b;">📋 Registered Users List</h4>
+                            <button onclick="downloadAdminRegUsersPDF()" class="btn" style="width: auto; padding: 6px 12px; font-size: 12px; background: #2563eb;">📄 Download PDF</button>
+                        </div>
+                        <p style="font-size: 12px; color: #64748b;">Yahan platform par register hone wale sabhi users ke naam aur mobile number dikh rahe hain:</p>
+                        <div style="overflow-x: auto;">
+                            <table class="player-table">
+                               <thead>
+                                   <tr>
+                                       <th>Naam (Name)</th>
+                                       <th>Mobile Number</th>
+                                       <th>Wallet Balance (₹)</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="admin-reg-users-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin-subtab-admindevices" style="display: none;">
+                    <div style="background: #f8fafc; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 15px;">
+                        <h4 style="margin-top: 0; color: #1e293b;">💻 Admin Panel Connected Devices</h4>
+                        <p style="font-size: 12px; color: #64748b;">Yahan wo sabhi devices aur unka naam dikh raha hai jinhone admin panel ko khola hai:</p>
+                        <div id="admin-devices-list-container">Loading Devices...</div>
                     </div>
                 </div>
 
@@ -674,7 +705,6 @@
     </div>
 
     <script>
-        // Check if user already accepted the warning popup in this device
         window.addEventListener('DOMContentLoaded', () => {
             const hasAccepted = localStorage.getItem('ludo_warning_accepted');
             if (hasAccepted) {
@@ -689,15 +719,15 @@
             if(modal) {
                 modal.style.transition = 'opacity 0.3s ease';
                 modal.style.opacity = '0';
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                }, 300);
+                setTimeout(() => { modal.style.display = 'none'; }, 300);
             }
         }
 
         let currentUser = localStorage.getItem('ludo_user') || '';
         let currentUserName = localStorage.getItem('ludo_name') || '';
         let currentUserPassword = localStorage.getItem('ludo_pass') || '';
+        let globalQrList = [];
+        let sessionInterval = null;
 
         window.onload = function() {
             if (currentUser) {
@@ -707,6 +737,41 @@
                 document.getElementById('main-app-container').style.display = 'none';
             }
         };
+
+        function startSessionTimer() {
+            let sessionStart = localStorage.getItem('ludo_session_time');
+            const ONE_HOUR = 60 * 60 * 1000;
+
+            if (!sessionStart) {
+                sessionStart = Date.now();
+                localStorage.setItem('ludo_session_time', sessionStart);
+            }
+
+            const timerBar = document.getElementById('session-timer-bar');
+            if(timerBar) timerBar.style.display = 'flex';
+
+            if (sessionInterval) clearInterval(sessionInterval);
+
+            sessionInterval = setInterval(() => {
+                const elapsed = Date.now() - Number(sessionStart);
+                const remaining = ONE_HOUR - elapsed;
+
+                if (remaining <= 0) {
+                    clearInterval(sessionInterval);
+                    alert('Aapka 1 ghante ka session samapt ho gaya hai. Kripya dobara login karein!');
+                    logoutUser();
+                    return;
+                }
+
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+                
+                const disp = document.getElementById('session-countdown-display');
+                if(disp) {
+                    disp.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
 
         function switchAuthTab(tabType) {
             document.querySelectorAll('.auth-section').forEach(s => s.classList.remove('active'));
@@ -745,6 +810,7 @@
                 localStorage.setItem('ludo_user', currentUser);
                 localStorage.setItem('ludo_name', currentUserName);
                 localStorage.setItem('ludo_pass', currentUserPassword);
+                localStorage.setItem('ludo_session_time', Date.now());
                 showMainApp();
             }
         }
@@ -773,6 +839,7 @@
                 localStorage.setItem('ludo_user', currentUser);
                 localStorage.setItem('ludo_name', currentUserName);
                 localStorage.setItem('ludo_pass', currentUserPassword);
+                localStorage.setItem('ludo_session_time', Date.now());
                 showMainApp();
             }
         }
@@ -790,10 +857,20 @@
             if(document.getElementById('profile-name-display')) document.getElementById('profile-name-display').innerText = currentUserName;
             if(document.getElementById('profile-phone-display')) document.getElementById('profile-phone-display').innerText = currentUser;
 
+            startSessionTimer();
             fetchBalance();
             loadChallenges();
             loadCompletedGames();
             loadTxHistory();
+
+            setInterval(() => {
+                if(currentUser) {
+                    fetchBalance();
+                    loadChallenges();
+                    loadCompletedGames();
+                    loadTxHistory();
+                }
+            }, 4000);
         }
 
         function togglePasswordView() {
@@ -819,6 +896,8 @@
             localStorage.removeItem('ludo_user');
             localStorage.removeItem('ludo_name');
             localStorage.removeItem('ludo_pass');
+            localStorage.removeItem('ludo_session_time');
+            if(sessionInterval) clearInterval(sessionInterval);
             location.reload();
         }
 
@@ -835,15 +914,50 @@
         }
 
         function switchAdminSubTab(subTab) {
-            if(subTab === 'dashboard') {
-                document.getElementById('admin-subtab-dashboard').style.display = 'block';
-                document.getElementById('admin-subtab-playerlist').style.display = 'none';
-                loadAdminData();
-            } else {
-                document.getElementById('admin-subtab-dashboard').style.display = 'none';
-                document.getElementById('admin-subtab-playerlist').style.display = 'block';
-                loadAdminPlayerTable();
+            document.getElementById('admin-subtab-dashboard').style.display = (subTab === 'dashboard') ? 'block' : 'none';
+            document.getElementById('admin-subtab-livegames').style.display = (subTab === 'livegames') ? 'block' : 'none';
+            document.getElementById('admin-subtab-playerlist').style.display = (subTab === 'playerlist') ? 'block' : 'none';
+            document.getElementById('admin-subtab-regusers').style.display = (subTab === 'regusers') ? 'block' : 'none';
+            document.getElementById('admin-subtab-admindevices').style.display = (subTab === 'admindevices') ? 'block' : 'none';
+
+            if(subTab === 'dashboard') loadAdminData();
+            if(subTab === 'livegames') loadAdminData();
+            if(subTab === 'playerlist') loadAdminData();
+            if(subTab === 'regusers') loadRegisteredUsersList();
+            if(subTab === 'admindevices') loadAdminDevicesList();
+        }
+
+        function maskPhone(phone) {
+            if (!phone || phone.length < 4) return '****';
+            return '******' + phone.slice(-4);
+        }
+
+        function updateDynamicQR(amountVal) {
+            const qrContainer = document.getElementById('qr-codes-container');
+            if (!qrContainer) return;
+
+            const amt = parseFloat(amountVal) || 0;
+            if (amt <= 0) {
+                qrContainer.style.display = 'none';
+                qrContainer.innerHTML = '';
+                return;
             }
+
+            if (globalQrList.length === 0) return;
+
+            let selectedQR = (amt < 1000) ? globalQrList.find(q => q.name.includes('Google Pay')) || globalQrList[1] || globalQrList[0] 
+                                          : globalQrList.find(q => q.name.includes('PhonePe')) || globalQrList[0];
+
+            if (!selectedQR) return;
+
+            qrContainer.style.display = 'block';
+            qrContainer.innerHTML = `
+                <div class="card" style="margin-top: 10px; animation: fadeIn 0.3s ease;">
+                    <strong style="color: #b45309;">📱 Scan & Pay via ${selectedQR.name}</strong><br><br>
+                    <img src="${selectedQR.qrImage}" alt="QR Code" style="max-width: 160px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.1);"><br><br>
+                    UPI ID: <code style="background: #fff; padding: 4px 8px; font-weight: bold; border-radius: 4px; border: 1px solid #fef3c7;">${selectedQR.upiId}</code>
+                </div>
+            `;
         }
 
         async function updatePassword(e) {
@@ -886,14 +1000,18 @@
             try {
                 const res = await fetch('/api/admin/data');
                 const data = await res.json();
-                let html = '';
+                globalQrList = data.qrCodes || [];
                 
+                let html = '';
                 const activeChallenges = (data.challenges || []).filter(c => c.status !== 'completed' && c.status !== 'Cancelled');
 
                 if(activeChallenges.length === 0) {
                     html = '<p style="color: #64748b;">Abhi koi active challenge nahi hai.</p>';
                 } else {
                     activeChallenges.forEach(c => {
+                        let maskedCreator = maskPhone(c.creator);
+                        let maskedJoiner = c.joinedBy ? maskPhone(c.joinedBy) : 'Waiting...';
+
                         let actionHtml = '';
                         if (c.status === 'Open') {
                             if (c.creator !== currentUser) {
@@ -904,15 +1022,15 @@
                         } else if (c.status === 'Running') {
                             if (c.creator === currentUser) {
                                 actionHtml = `
-                                    <p style="color: #16a34a; font-weight: bold;">Joined by: ${c.joinedBy}</p>
+                                    <p style="color: #16a34a; font-weight: bold;">Joined by: ${maskedJoiner}</p>
                                     <div style="margin-top:8px; background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fef3c7;">
-                                        <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px; color: #92400e;">Aap Creator hain, Room Code daalein:</label>
-                                        <input type="text" id="room-input-${c.id}" placeholder="Ludo Room Code Dalein" style="width:70%; display:inline-block; padding:8px; background: white;">
+                                        <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px; color: #92400e;">Aap Creator hain, 8-Digit Room Code daalein:</label>
+                                        <input type="text" id="room-input-${c.id}" placeholder="8 Digit Room Code" maxlength="8" style="width:70%; display:inline-block; padding:8px; background: white;">
                                         <button class="btn" style="background:#16a34a; width:25%; display:inline-block; padding:8px;" onclick="submitRoomCode(${c.id})">Send</button>
                                     </div>
                                 `;
                             } else {
-                                actionHtml = `<p style="color: #16a34a; font-weight: bold;">Joined by: ${c.joinedBy}</p><p style="color: #64748b; font-style: italic; font-size: 13px;">Creator ke room code bhejne ka intezaar hai...</p>`;
+                                actionHtml = `<p style="color: #16a34a; font-weight: bold;">Joined by: ${maskedJoiner}</p><p style="color: #64748b; font-style: italic; font-size: 13px;">Creator ke room code bhejne ka intezaar hai...</p>`;
                             }
                         } else if (c.status === 'Playing') {
                             actionHtml = `<p style="color: #9333ea; font-weight: bold; background: #f3e8ff; padding: 8px; border-radius: 6px;">🎮 Room Code: <code>${c.roomCode}</code> (Match Running)</p>`;
@@ -921,7 +1039,7 @@
                         let chatMessages = '';
                         if (c.chats && c.chats.length > 0) {
                             c.chats.forEach(msg => {
-                                chatMessages += `<div style="margin-bottom: 4px;"><b>${msg.sender}:</b> ${msg.message} <span style="font-size:10px; color:#94a3b8;">(${msg.time})</span></div>`;
+                                chatMessages += `<div style="margin-bottom: 4px;"><b>${maskPhone(msg.sender)}:</b> ${msg.message} <span style="font-size:10px; color:#94a3b8;">(${msg.time})</span></div>`;
                             });
                         } else {
                             chatMessages = '<div style="color: #94a3b8; font-size: 12px;">Abhi koi baatcheet nahi hui.</div>';
@@ -938,7 +1056,7 @@
                         html += `
                             <div class="challenge-box">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                    <strong>Creator: ${c.creator}</strong> 
+                                    <b>Creator: ${maskedCreator}</b> 
                                     <span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 6px; font-weight: 700;">₹${c.amount}</span>
                                 </div>
                                 <p style="margin: 4px 0; color: #475569; font-size: 14px;"><b>Terms:</b> ${c.description}</p>
@@ -954,19 +1072,6 @@
                 }
                 const listEl = document.getElementById('challenges-list');
                 if(listEl) listEl.innerHTML = html;
-
-                let qrHtml = '';
-                (data.qrCodes || []).forEach(q => {
-                    qrHtml += `
-                        <div class="card">
-                            <strong style="color: #b45309;">${q.name}</strong><br><br>
-                            <img src="${q.qrImage}" alt="QR Code" style="max-width: 160px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.1);"><br><br>
-                            UPI ID: <code style="background: #fff; padding: 4px 8px; font-weight: bold; border-radius: 4px; border: 1px solid #fef3c7;">${q.upiId}</code>
-                        </div>
-                    `;
-                });
-                const qrEl = document.getElementById('qr-codes-container');
-                if(qrEl) qrEl.innerHTML = qrHtml;
             } catch(e) { console.error(e); }
         }
 
@@ -975,21 +1080,20 @@
                 const res = await fetch('/api/admin/data');
                 const data = await res.json();
                 let historyHtml = '';
-
-                const completedChallenges = (data.challenges || []).filter(c => c.status === 'completed');
+                
+                const completedChallenges = (data.challenges || []).filter(c => c.status === 'completed' && (c.creator === currentUser || c.joinedBy === currentUser));
 
                 if(completedChallenges.length === 0) {
-                    historyHtml = '<p style="color: #64748b;">Abhi tak koi completed game nahi hai.</p>';
+                    historyHtml = '<p style="color: #64748b;">Aapka abhi tak koi completed game nahi hai.</p>';
                 } else {
                     completedChallenges.forEach(c => {
                         let ssHtml = c.screenshot ? `<p><a href="${c.screenshot}" target="_blank"><img src="${c.screenshot}" alt="Win Proof" style="max-width: 120px; border-radius: 6px; border: 1px solid #cbd5e1;"></a></p>` : '<p style="color:#94a3b8; font-size: 13px;">Screenshot available nahi hai</p>';
-                        
                         historyHtml += `
                             <div class="completed-box">
-                                <p style="margin: 4px 0;"><b>Creator:</b> ${c.creator} vs <b>Joiner:</b> ${c.joinedBy || 'N/A'}</p>
+                                <p style="margin: 4px 0;"><b>Creator:</b> ${maskPhone(c.creator)} vs <b>Joiner:</b> ${c.joinedBy ? maskPhone(c.joinedBy) : 'N/A'}</p>
                                 <p style="margin: 4px 0;"><b>Game Amount:</b> ₹${c.amount}</p>
                                 <p style="margin: 4px 0;"><b>Room Code:</b> <code>${c.roomCode || 'N/A'}</code></p>
-                                <p style="margin: 4px 0;"><b>Winner:</b> <span style="color: #16a34a; font-weight: bold;">${c.winner || 'N/A'}</span> (Won: ₹${c.winAmount || 0})</p>
+                                <p style="margin: 4px 0;"><b>Winner:</b> <span style="color: #16a34a; font-weight: bold;">${maskPhone(c.winner) || 'N/A'}</span> (Won: ₹${c.winAmount || 0})</p>
                                 <p style="margin: 6px 0 2px 0; font-size: 13px; font-weight: 600; color: #475569;">Win Proof Screenshot:</p>
                                 ${ssHtml}
                             </div>
@@ -1012,7 +1116,7 @@
                 else {
                     myDeposits.forEach(d => {
                         let ss = d.screenshot ? `<a href="${d.screenshot}" target="_blank"><img src="${d.screenshot}" style="max-width:70px; border-radius:6px; border:1px solid #cbd5e1;"></a>` : 'N/A';
-                        depHtml += `<div class="admin-box" style="background:#fff;"><p style="margin:4px 0;"><b>Amount:</b> ₹${d.amount} | <b>UTR:</b> ${d.utr}</p><p style="margin:4px 0;"><b>Status:</b> <span style="color:${d.status==='Approved'?'#16a34a':(d.status==='Rejected'?'#dc2626':'#d97706')}; font-weight:bold;">${d.status}</span> | <span style="font-size:12px; color:#64748b;">${d.date}</span></p><p style="margin:4px 0;"><b>Proof:</b> ${ss}</p></div>`;
+                        depHtml += `<div class="admin-box" style="background:#fff;"><p style="margin:4px 0;"><b>Amount:</b> ₹${d.amount}</p><p style="margin:4px 0;"><b>Status:</b> <span style="color:${d.status==='Approved'?'#16a34a':(d.status==='Rejected'?'#dc2626':'#d97706')}; font-weight:bold;">${d.status}</span> | <span style="font-size:12px; color:#64748b;">${d.date}</span></p><p style="margin:4px 0;"><b>Proof:</b> ${ss}</p></div>`;
                     });
                 }
                 const depEl = document.getElementById('user-deposit-history');
@@ -1070,7 +1174,10 @@
         async function submitRoomCode(challengeId) {
             const inputEl = document.getElementById(`room-input-${challengeId}`);
             const roomCode = inputEl ? inputEl.value.trim() : '';
-            if(!roomCode) { alert('Room Code bharna zaroori hai!'); return; }
+            if(!roomCode || roomCode.length !== 8 || !/^\d+$/.test(roomCode)) {
+                alert('Room Code theek 8 digits ka numeric hona anivarya hai!');
+                return;
+            }
             const res = await fetch('/api/challenge/roomcode', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1103,13 +1210,14 @@
             const formData = new FormData();
             formData.append('username', currentUser);
             formData.append('amount', document.getElementById('dep-amount').value);
-            formData.append('utr', document.getElementById('dep-utr').value);
             formData.append('screenshot', document.getElementById('dep-screenshot').files[0]);
+            
             const res = await fetch('/api/deposit', { method: 'POST', body: formData });
             const result = await res.json();
             alert(result.message);
             if(result.success) {
                 document.getElementById('deposit-form').reset();
+                document.getElementById('qr-codes-container').style.display = 'none';
                 loadTxHistory();
             }
         }
@@ -1153,9 +1261,15 @@
 
         async function submitGameResult(e) {
             e.preventDefault();
+            const roomVal = document.getElementById('res-room').value.trim();
+            if (roomVal.length !== 8 || !/^\d+$/.test(roomVal)) {
+                alert('Room code theek 8 digits ka hona zaroori hai!');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('username', currentUser);
-            formData.append('roomCode', document.getElementById('res-room').value);
+            formData.append('roomCode', roomVal);
             formData.append('screenshot', document.getElementById('res-screenshot').files[0]);
             const res = await fetch('/api/submit-result', { method: 'POST', body: formData });
             const result = await res.json();
@@ -1165,10 +1279,12 @@
 
         async function verifyAdminLogin() {
             const password = document.getElementById('admin-password-input').value;
+            const deviceName = navigator.userAgentData && navigator.userAgentData.platform ? navigator.userAgentData.platform : (navigator.platform || 'Browser Device') + ' (' + (navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop') + ')';
+            
             const res = await fetch('/api/admin/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password })
+                body: JSON.stringify({ password, deviceName })
             });
             const result = await res.json();
             if(result.success) {
@@ -1190,18 +1306,34 @@
                 const res = await fetch('/api/admin/data');
                 const data = await res.json();
 
-                // Live Games Management for Admin (Cancel Option)
+                const commDisplay = document.getElementById('daily-commission-display');
+                if(commDisplay) commDisplay.innerText = `₹${data.dailyCommission || 0}`;
+
                 let liveGamesHtml = '';
-                const liveChallenges = (data.challenges || []).filter(c => c.status !== 'completed' && c.status !== 'Cancelled');
-                if(liveChallenges.length === 0) {
+                let liveGamesFullHtml = '';
+                const allChallenges = data.challenges || [];
+                
+                const runningChallenges = allChallenges.filter(c => c.status !== 'completed' && c.status !== 'Cancelled');
+                const completedChallengesList = allChallenges.filter(c => c.status === 'completed');
+
+                if(runningChallenges.length === 0) {
                     liveGamesHtml = '<p style="color:#64748b;">Koi active/live game nahi chal raha hai.</p>';
                 } else {
-                    liveChallenges.forEach(c => {
+                    runningChallenges.forEach(c => {
                         liveGamesHtml += `
                             <div class="admin-box" style="background:#fff; border-left:4px solid #ef4444;">
-                                <p style="margin:4px 0;"><b>ID:</b> ${c.id} | <b>Creator:</b> ${c.creator} vs <b>Joiner:</b> ${c.joinedBy || 'Waiting...'}</p>
+                                <p style="margin:4px 0;"><b>ID:</b> ${c.id} | <b>Creator:</b> ${maskPhone(c.creator)} vs <b>Joiner:</b> ${c.joinedBy ? maskPhone(c.joinedBy) : 'Waiting...'}</p>
                                 <p style="margin:4px 0;"><b>Amount:</b> ₹${c.amount} | <b>Status:</b> <span style="color:#0284c7; font-weight:bold;">${c.status}</span></p>
-                                <button class="btn" style="background:#ef4444; width:auto; padding:6px 12px; margin-top:6px;" onclick="adminCancelGame(${c.id})">❌ Cancel Game & Refund</button>
+                                <div style="margin-top: 8px;">
+                                    <label style="font-size: 11px; font-weight: bold; color: #b91c1c;">Refund Kisko Dena Hai?</label>
+                                    <select id="refund-opt-${c.id}" style="margin: 4px 0 8px 0; background: #fff5f5; padding: 6px;">
+                                        <option value="both">Both (Creator & Joiner dono ko)</option>
+                                        <option value="creator">Sirf Creator ko</option>
+                                        <option value="joiner">Sirf Joiner ko</option>
+                                        <option value="none">Kisi ko nahi (No Refund)</option>
+                                    </select>
+                                    <button class="btn" style="background:#ef4444; width:auto; padding:6px 12px;" onclick="adminCancelGameWithOption(${c.id})">❌ Cancel Game & Refund</button>
+                                </div>
                             </div>
                         `;
                     });
@@ -1209,12 +1341,41 @@
                 const liveEl = document.getElementById('admin-live-games');
                 if(liveEl) liveEl.innerHTML = liveGamesHtml;
 
+                if(allChallenges.length === 0) {
+                    liveGamesFullHtml = '<p style="color:#64748b;">Koi game record nahi hai.</p>';
+                } else {
+                    runningChallenges.forEach(c => {
+                        liveGamesFullHtml += `
+                            <div class="admin-box" style="background:#fff; border-left:4px solid #10b981;">
+                                <p style="margin:4px 0;"><b>Game ID:</b> ${c.id} | <span style="background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px; font-weight:bold;">RUNNING</span></p>
+                                <p style="margin:4px 0; color: #1e293b;"><b>Creator Mobile:</b> <code style="background:#e2e8f0; padding:2px 6px; font-weight:bold;">${c.creator}</code></p>
+                                <p style="margin:4px 0; color: #1e293b;"><b>Joiner Mobile:</b> <code style="background:#e2e8f0; padding:2px 6px; font-weight:bold;">${c.joinedBy || 'Not Joined Yet'}</code></p>
+                                <p style="margin:4px 0;"><b>Amount:</b> ₹${c.amount} | <b>Room Code:</b> ${c.roomCode || 'N/A'}</p>
+                                <p style="margin:4px 0;"><b>Status:</b> <span style="color:#10b981; font-weight:bold;">${c.status}</span> | <b>Terms:</b> ${c.description}</p>
+                            </div>
+                        `;
+                    });
+                    completedChallengesList.forEach(c => {
+                        liveGamesFullHtml += `
+                            <div class="admin-box" style="background:#f8fafc; border-left:4px solid #64748b; opacity: 0.95;">
+                                <p style="margin:4px 0;"><b>Game ID:</b> ${c.id} | <span style="background:#e2e8f0; color:#334155; padding:2px 6px; border-radius:4px; font-weight:bold;">COMPLETED</span></p>
+                                <p style="margin:4px 0; color: #1e293b;"><b>Creator Mobile:</b> <code style="background:#e2e8f0; padding:2px 6px; font-weight:bold;">${c.creator}</code></p>
+                                <p style="margin:4px 0; color: #1e293b;"><b>Joiner Mobile:</b> <code style="background:#e2e8f0; padding:2px 6px; font-weight:bold;">${c.joinedBy || 'N/A'}</code></p>
+                                <p style="margin:4px 0;"><b>Amount:</b> ₹${c.amount} | <b>Winner:</b> <span style="color:#16a34a; font-weight:bold;">${c.winner || 'N/A'}</span> (Won: ₹${c.winAmount || 0})</p>
+                                <p style="margin:4px 0;"><b>Room Code:</b> ${c.roomCode || 'N/A'} | <b>Status:</b> <span style="color:#64748b; font-weight:bold;">completed</span></p>
+                            </div>
+                        `;
+                    });
+                }
+                const liveFullEl = document.getElementById('admin-live-games-full');
+                if(liveFullEl) liveFullEl.innerHTML = liveGamesFullHtml;
+
                 let depHtml = '';
                 const pendingDeposits = (data.deposits || []).filter(d => d.status === 'Pending');
                 if(pendingDeposits.length === 0) depHtml = '<p style="color:#64748b;">Koi pending deposit nahi hai.</p>';
                 else {
                     pendingDeposits.forEach(d => {
-                        depHtml += `<div class="admin-box"><p style="margin:4px 0;"><b>Mobile: ${d.username}</b> | ₹${d.amount} | UTR: ${d.utr}</p><p style="margin:4px 0;"><a href="${d.screenshot}" target="_blank" style="color:var(--primary); font-weight:600;">View Screenshot</a></p><button class="btn" style="background:#16a34a; width:auto; padding:6px 12px; margin-top:6px;" onclick="verifyDeposit(${d.id}, 'Approve')">Approve</button> <button class="btn" style="background:#dc2626; width:auto; padding:6px 12px; margin-top:6px;" onclick="verifyDeposit(${d.id}, 'Reject')">Reject</button></div>`;
+                        depHtml += `<div class="admin-box"><p style="margin:4px 0;"><b>Mobile: ${d.username}</b> | ₹${d.amount}</p><p style="margin:4px 0;"><a href="${d.screenshot}" target="_blank" style="color:var(--primary); font-weight:600;">View Screenshot</a></p><button class="btn" style="background:#16a34a; width:auto; padding:6px 12px; margin-top:6px;" onclick="verifyDeposit(${d.id}, 'Approve')">Approve</button> <button class="btn" style="background:#dc2626; width:auto; padding:6px 12px; margin-top:6px;" onclick="verifyDeposit(${d.id}, 'Reject')">Reject</button></div>`;
                     });
                 }
                 const depEl = document.getElementById('admin-deposits');
@@ -1238,52 +1399,287 @@
                 if(pendingResults.length === 0) resHtml = '<p style="color:#64748b;">Koi pending win result nahi hai.</p>';
                 else {
                     pendingResults.forEach(r => {
-                        resHtml += `<div class="admin-box" style="background: #f0fdf4;"><p style="margin:4px 0;"><b>Winner: ${r.username}</b> | Room: ${r.roomCode}</p><p style="margin:4px 0;"><a href="${r.screenshot}" target="_blank" style="color:var(--primary); font-weight:600;">🔍 Win Proof Screenshot</a></p>
+                        resHtml += `<div class="admin-box" style="background: #f0fdf4;"><p style="margin:4px 0;"><b>Winner: ${maskPhone(r.username)}</b> | Room: ${r.roomCode}</p><p style="margin:4px 0;"><a href="${r.screenshot}" target="_blank" style="color:var(--primary); font-weight:600;">🔍 Win Proof Screenshot</a></p>
                         <input type="number" id="win-amt-${r.id}" placeholder="Jeetne wali rashi (₹)" style="margin:8px 0; background:white;">
-                        <button class="btn" style="background:#16a34a; width:auto; padding:6px 12px;" onclick="verifyResult(${r.id}, 'Approve', '${r.username}')">Approve & Pay</button> 
+                        <button class="btn" style="background:#16a34a; width:auto; padding:6px 12px;" onclick="verifyResult(${r.id}, 'Approve', '${r.username}')">Approve & Pay (5% Deduct)</button> 
                         <button class="btn" style="background:#dc2626; width:auto; padding:6px 12px; margin-left:5px;" onclick="verifyResult(${r.id}, 'Reject', '${r.username}')">Reject</button></div>`;
                     });
                 }
                 const resEl = document.getElementById('admin-results');
                 if(resEl) resEl.innerHTML = resHtml;
+
+                loadAdminPlayerTableData(data.players || []);
+                loadAdminDevicesList(data.adminSessions || []);
+
             } catch(e) { console.error(e); }
         }
 
-        async function adminCancelGame(challengeId) {
-            if(!confirm('Kya aap is live game ko cancel karna chahte hain?')) return;
+        // --- PDF GENERATION FUNCTIONS USING jsPDF ---
+        async function downloadUserTransactionsPDF() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+                const myDeposits = (data.deposits || []).filter(d => d.username === currentUser);
+                const myWithdrawals = (data.withdrawals || []).filter(w => w.username === currentUser);
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(16);
+                doc.text("New Indian Ludo Hub - User Transactions Report", 14, 20);
+                
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "normal");
+                doc.text(`User Mobile: ${currentUser}`, 14, 28);
+                doc.text(`Generated Date: ${new Date().toLocaleString()}`, 14, 35);
+
+                let y = 45;
+                doc.setFont("helvetica", "bold");
+                doc.text("Deposits History:", 14, y);
+                y += 6;
+
+                doc.setFont("helvetica", "normal");
+                if (myDeposits.length === 0) {
+                    doc.text("No deposits found.", 14, y);
+                    y += 10;
+                } else {
+                    myDeposits.forEach((d, idx) => {
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.text(`${idx + 1}. Amount: Rs.${d.amount} | Status: ${d.status} | Date: ${d.date}`, 14, y);
+                        y += 7;
+                    });
+                }
+
+                y += 5;
+                doc.setFont("helvetica", "bold");
+                doc.text("Withdrawals History:", 14, y);
+                y += 6;
+
+                doc.setFont("helvetica", "normal");
+                if (myWithdrawals.length === 0) {
+                    doc.text("No withdrawals found.", 14, y);
+                } else {
+                    myWithdrawals.forEach((w, idx) => {
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        let typeInfo = w.upiId ? `UPI: ${w.upiId}` : (w.mobileNumber ? `Mobile: ${w.mobileNumber}` : `QR Withdrawal`);
+                        doc.text(`${idx + 1}. Amount: Rs.${w.amount} | ${typeInfo} | Status: ${w.status} | Date: ${w.date}`, 14, y);
+                        y += 7;
+                    });
+                }
+
+                doc.save(`User_Transactions_${currentUser}.pdf`);
+            } catch (err) {
+                alert('PDF generate karne mein error aayi: ' + err.message);
+            }
+        }
+
+        async function downloadAdminGamesPDF() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+                const challenges = data.challenges || [];
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(16);
+                doc.text("Admin Backup - Live & Completed Games Report", 14, 20);
+                
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Generated Date: ${new Date().toLocaleString()}`, 14, 28);
+
+                let y = 40;
+                if (challenges.length === 0) {
+                    doc.text("No game challenges found.", 14, y);
+                } else {
+                    challenges.forEach((c, idx) => {
+                        if (y > 265) { doc.addPage(); y = 20; }
+                        doc.setFont("helvetica", "bold");
+                        doc.text(`Game ID: ${c.id} [Status: ${c.status.toUpperCase()}]`, 14, y);
+                        y += 6;
+                        doc.setFont("helvetica", "normal");
+                        doc.text(`Creator: ${c.creator} | Joiner: ${c.joinedBy || 'N/A'} | Amount: Rs.${c.amount}`, 14, y);
+                        y += 6;
+                        doc.text(`Room Code: ${c.roomCode || 'N/A'} | Winner: ${c.winner || 'N/A'} (Won: Rs.${c.winAmount || 0})`, 14, y);
+                        y += 10;
+                    });
+                }
+
+                doc.save(`Admin_Games_Backup_${Date.now()}.pdf`);
+            } catch (err) {
+                alert('PDF generate karne mein error aayi: ' + err.message);
+            }
+        }
+
+        async function downloadAdminPlayersPDF() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+                const players = data.players || [];
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(16);
+                doc.text("Admin Backup - Player Manager Report", 14, 20);
+                
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Generated Date: ${new Date().toLocaleString()}`, 14, 28);
+
+                let y = 40;
+                if (players.length === 0) {
+                    doc.text("No players found.", 14, y);
+                } else {
+                    players.forEach((p, idx) => {
+                        if (y > 275) { doc.addPage(); y = 20; }
+                        doc.text(`${idx + 1}. Mobile: ${p.mobile} | Name: ${p.name} | Balance: Rs.${p.amount}`, 14, y);
+                        y += 7;
+                    });
+                }
+
+                doc.save(`Admin_Players_Manager_${Date.now()}.pdf`);
+            } catch (err) {
+                alert('PDF generate karne mein error aayi: ' + err.message);
+            }
+        }
+
+        async function downloadAdminRegUsersPDF() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+                const users = data.users || [];
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(16);
+                doc.text("Admin Backup - Registered Users Report", 14, 20);
+                
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Generated Date: ${new Date().toLocaleString()}`, 14, 28);
+
+                let y = 40;
+                if (users.length === 0) {
+                    doc.text("No registered users found.", 14, y);
+                } else {
+                    users.forEach((u, idx) => {
+                        if (y > 275) { doc.addPage(); y = 20; }
+                        doc.text(`${idx + 1}. Name: ${u.name || 'N/A'} | Mobile: ${u.mobile} | Balance: Rs.${u.balance}`, 14, y);
+                        y += 7;
+                    });
+                }
+
+                doc.save(`Admin_Registered_Users_${Date.now()}.pdf`);
+            } catch (err) {
+                alert('PDF generate karne mein error aayi: ' + err.message);
+            }
+        }
+
+        function loadAdminDevicesList(sessions) {
+            const container = document.getElementById('admin-devices-list-container');
+            if (!container) return;
+            
+            if (!sessions || sessions.length === 0) {
+                container.innerHTML = '<p style="color:#64748b;">Abhi koi admin session recorded nahi hai.</p>';
+                return;
+            }
+
+            let html = `
+                <p style="font-weight: bold; color: #1e293b; margin-bottom: 10px;">Total Connected Admin Devices: <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">${sessions.length}</span></p>
+            `;
+            sessions.forEach((s, idx) => {
+                html += `
+                    <div class="admin-box" style="background:#fff; border-left:4px solid #9333ea;">
+                        <p style="margin:4px 0;"><b>Device #${idx + 1}:</b> <code style="background:#f1f5f9; padding:2px 6px; font-weight:bold;">${s.deviceName}</code></p>
+                        <p style="margin:4px 0; font-size:13px; color:#64748b;">Login Time: ${s.loginTime} | IP: ${s.ip}</p>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        async function adminCancelGameWithOption(challengeId) {
+            const selectEl = document.getElementById(`refund-opt-${challengeId}`);
+            const refundOption = selectEl ? selectEl.value : 'both';
+
+            if(!confirm(`Kya aap is live game ko cancel karna chahte hain? (Selected Refund Option: ${refundOption})`)) return;
+            
             const res = await fetch('/api/admin/cancel-game', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ challengeId })
+                body: JSON.stringify({ challengeId, refundOption })
             });
             const result = await res.json();
             alert(result.message);
             loadAdminData();
         }
 
-        // --- Player List Manager Functions ---
+        function loadAdminPlayerTableData(players) {
+            let tbodyHtml = '';
+            if(players.length === 0) {
+                tbodyHtml = `<tr><td colspan="4" style="text-align:center; color:#64748b;">Koi player add nahi hai.</td></tr>`;
+            } else {
+                players.forEach((p, index) => {
+                    tbodyHtml += `
+                        <tr>
+                            <td><input type="text" id="p-mob-${index}" value="${p.mobile || ''}" maxlength="10"></td>
+                            <td><input type="text" id="p-name-${index}" value="${p.name || ''}"></td>
+                            <td><input type="number" id="p-amt-${index}" value="${p.amount || 0}"></td>
+                            <td style="text-align: center;"><button onclick="deletePlayerRow(${index})" style="background:#dc2626; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">❌</button></td>
+                        </tr>
+                    `;
+                });
+            }
+            const tbodyEl = document.getElementById('admin-players-tbody');
+            if(tbodyEl) tbodyEl.innerHTML = tbodyHtml;
+        }
+
         async function loadAdminPlayerTable() {
             try {
                 const res = await fetch('/api/admin/data');
                 const data = await res.json();
-                let tbodyHtml = '';
-                const players = data.players || [];
+                loadAdminPlayerTableData(data.players || []);
+                const commDisplay = document.getElementById('daily-commission-display');
+                if(commDisplay) commDisplay.innerText = `₹${data.dailyCommission || 0}`;
+            } catch(e) { console.error(e); }
+        }
 
-                if(players.length === 0) {
-                    tbodyHtml = `<tr><td colspan="4" style="text-align:center; color:#64748b;">Koi player add nahi hai. Niche form se add karein.</td></tr>`;
+        async function resetCommissionCounter() {
+            if(!confirm('Kya aap pure din ka commission counter reset karke ₹0 karna chahte hain?')) return;
+            const res = await fetch('/api/admin/reset-commission', { method: 'POST' });
+            const result = await res.json();
+            alert(result.message);
+            loadAdminData();
+        }
+
+        async function loadRegisteredUsersList() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+                let tbodyHtml = '';
+                const users = data.users || [];
+
+                if(users.length === 0) {
+                    tbodyHtml = `<tr><td colspan="3" style="text-align:center; color:#64748b;">Abhi koi user registered nahi hai.</td></tr>`;
                 } else {
-                    players.forEach((p, index) => {
+                    users.forEach(u => {
                         tbodyHtml += `
                             <tr>
-                                <td><input type="text" id="p-mob-${index}" value="${p.mobile || ''}" maxlength="10"></td>
-                                <td><input type="text" id="p-name-${index}" value="${p.name || ''}"></td>
-                                <td><input type="number" id="p-amt-${index}" value="${p.amount || 0}"></td>
-                                <td style="text-align: center;"><button onclick="deletePlayerRow(${index})" style="background:#dc2626; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">❌</button></td>
+                                <td><b>${u.name || 'N/A'}</b></td>
+                                <td>${u.mobile}</td>
+                                <td>₹${u.balance || 0}</td>
                             </tr>
                         `;
                     });
                 }
-                document.getElementById('admin-players-tbody').innerHTML = tbodyHtml;
+                document.getElementById('admin-reg-users-tbody').innerHTML = tbodyHtml;
             } catch(e) { console.error(e); }
         }
 
